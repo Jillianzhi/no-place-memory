@@ -1,0 +1,20 @@
+{
+  "name": "no-place-3d",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc && vite build",
+    "preview": "vite preview --host 0.0.0.0"
+  },
+  "dependencies": {
+    "three": "^0.179.1"
+  },
+  "devDependencies": {
+    "@openai/sites-vite-plugin": "^0.2.0",
+    "@types/three": "^0.185.4",
+    "typescript": "^5.9.2",
+    "vite": "^8.0.0"
+  }
+}
