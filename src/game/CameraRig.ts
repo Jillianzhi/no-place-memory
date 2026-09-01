@@ -44,10 +44,10 @@ export class CameraRig {
         return;
       }
       if (index === 1) {
-        this.camera.fov = 49;
+        this.camera.fov = 48;
         this.camera.updateProjectionMatrix();
-        this.basePosition.set(0.02, 1.54, 6.05);
-        this.target.set(0.45, 1.08, -5.35);
+        this.basePosition.set(0.02, 1.62, 6.15);
+        this.target.set(0.28, 1.3, -5.55);
         return;
       }
       if (index === 2) {

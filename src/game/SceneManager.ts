@@ -35,19 +35,20 @@ const portraitLayouts: Record<SceneDefinition['id'], PortraitSceneLayout> = {
   },
   scene02_station: {
     visuals: [
-      { name: 'station_bench_row_1_visual', position: [-0.88, 0.5, -0.3], size: [1.72, 0.78, 0.02] },
-      { name: 'station_bench_row_2_visual', position: [-1.2, 0.44, -2.12], size: [1.4, 0.64, 0.02] },
-      { name: 'station_bench_row_3_visual', position: [-1.3, 0.39, -3.65], size: [1.08, 0.51, 0.02] },
-      { name: 'ticket_visual', position: [-0.55, 0.53, -0.27], size: [0.34, 0.16, 0.02] },
-      { name: 'station_ticket_glow_visual', position: [-0.55, 0.53, -0.285], size: [0.48, 0.26, 0.02] },
-      { name: 'gate_visual', position: [0.3, 0.49, -2.15], size: [0.46, 0.88, 0.02] },
-      { name: 'board_visual', position: [0.08, 2.22, -4.65], size: [1.24, 0.42, 0.02] },
-      { name: 'station_luggage_1_visual', position: [-0.72, 0.25, -5.05], size: [0.45, 0.5, 0.24] },
-      { name: 'station_luggage_2_visual', position: [-0.28, 0.21, -5.22], size: [0.38, 0.42, 0.22] },
-      { name: 'station_luggage_3_visual', position: [-1.18, 0.3, 2.18], size: [1.02, 0.5, 0.42] },
-      { name: 'station_trash_bin_visual', position: [0.48, 0.31, -3.72], size: [0.34, 0.62, 0.34] },
-      { name: 'station_umbrella_stand_1_visual', position: [-1.16, 0.27, -4.52], size: [0.3, 0.9, 0.3] },
-      { name: 'station_umbrella_stand_2_visual', position: [-0.86, 0.2, -5.35], size: [0.25, 0.68, 0.25] }
+      { name: 'station_bench_row_1_visual', position: [-1.02, 0.48, 0.18], size: [1.68, 0.78, 0.48] },
+      { name: 'station_bench_row_2_visual', position: [-1.2, 0.43, -2.05], size: [1.38, 0.65, 0.42] },
+      { name: 'station_bench_row_3_visual', position: [-1.32, 0.38, -4.18], size: [1.04, 0.51, 0.34] },
+      { name: 'ticket_visual', position: [-0.65, 0.55, 0.2], size: [0.34, 0.16, 0.02] },
+      { name: 'station_ticket_glow_visual', position: [-0.65, 0.55, 0.185], size: [0.48, 0.26, 0.02] },
+      { name: 'gate_visual', position: [0.7, 0.49, -2.92], size: [0.58, 0.98, 0.4] },
+      { name: 'station_board_frame_visual', position: [0.08, 2.42, -6.28], size: [1.34, 0.5, 0.12] },
+      { name: 'board_visual', position: [0.08, 2.42, -6.22], size: [1.18, 0.4, 0.02] },
+      { name: 'station_luggage_1_visual', position: [-0.52, 0.24, -4.92], size: [0.42, 0.48, 0.24] },
+      { name: 'station_luggage_2_visual', position: [-0.12, 0.2, -5.12], size: [0.35, 0.4, 0.22] },
+      { name: 'station_luggage_3_visual', position: [-1.72, 0.24, 1.3], size: [0.7, 0.44, 0.34] },
+      { name: 'station_trash_bin_visual', position: [0.28, 0.31, -3.82], size: [0.32, 0.62, 0.32] },
+      { name: 'station_umbrella_stand_1_visual', position: [-1.25, 0.26, -4.65], size: [0.28, 0.82, 0.28] },
+      { name: 'station_umbrella_stand_2_visual', position: [-0.82, 0.2, -5.32], size: [0.24, 0.64, 0.24] }
     ],
     hotspots: {
       hotspot_ticket: 'ticket_visual',
@@ -721,7 +722,7 @@ export class SceneManager {
       if (checked) {
         flags.checked = true;
         this.onMessage('车票被检过，终点仍然空着。');
-        this.moveVisual('ticket_visual', this.layoutPoint(new THREE.Vector3(0.35, 0.72, -2.72), new THREE.Vector3(0.3, 0.72, -2.07)));
+        this.moveVisual('ticket_visual', this.layoutPoint(new THREE.Vector3(0.72, 0.72, -2.98), new THREE.Vector3(0.7, 0.72, -2.86)));
         this.syncHotspotToVisual('hotspot_ticket', 'ticket_visual');
         this.swapVisualTexture('gate_image_visual', 'acceptedTexture');
         this.setHotspotEnabled('hotspot_ticket', false);

@@ -566,14 +566,14 @@ export class ProceduralGeometryFactory {
     bus.name = 'station_bus_body_visual';
 
     const blueBody = this.mappedMaterial('/assets/generated/scene02_v7/s02_bus_blue_metal_v1.jpg', 1.4, 2.2, 0.72);
-    blueBody.color.setHex(0xb7c7cd);
-    blueBody.emissive.setHex(0x263a43);
-    blueBody.emissiveIntensity = 0.22;
+    blueBody.color.setHex(0x8fa4ad);
+    blueBody.emissive.setHex(0x1d2b31);
+    blueBody.emissiveIntensity = 0.12;
     blueBody.metalness = 0.16;
     const creamBody = this.mappedMaterial('/assets/generated/scene02_v7/s02_bus_cream_metal_v1.jpg', 1.2, 2.6, 0.78);
-    creamBody.color.setHex(0xe3e1d8);
-    creamBody.emissive.setHex(0x3e4242);
-    creamBody.emissiveIntensity = 0.16;
+    creamBody.color.setHex(0xc8c9c3);
+    creamBody.emissive.setHex(0x303536);
+    creamBody.emissiveIntensity = 0.09;
     creamBody.metalness = 0.09;
     const darkMetal = new THREE.MeshStandardMaterial({ color: 0x273238, roughness: 0.58, metalness: 0.52 });
     const rubber = new THREE.MeshStandardMaterial({ color: 0x15191b, roughness: 0.9, metalness: 0.02 });
@@ -637,7 +637,7 @@ export class ProceduralGeometryFactory {
     sideBluePanel.rotation.y = Math.PI / 2;
     sideBluePanel.position.set(1.196, 1.02, 0);
     sideBluePanel.renderOrder = 14;
-    (sideBluePanel.material as THREE.MeshBasicMaterial).color.setHex(0x9fb6c2);
+    (sideBluePanel.material as THREE.MeshBasicMaterial).color.setHex(0x7f98a3);
     (sideBluePanel.material as THREE.MeshBasicMaterial).side = THREE.DoubleSide;
     bus.add(sideBluePanel);
 
@@ -651,7 +651,7 @@ export class ProceduralGeometryFactory {
     sideCreamPanel.rotation.y = Math.PI / 2;
     sideCreamPanel.position.set(1.199, 1.62, 0);
     sideCreamPanel.renderOrder = 15;
-    (sideCreamPanel.material as THREE.MeshBasicMaterial).color.setHex(0xd5d6cf);
+    (sideCreamPanel.material as THREE.MeshBasicMaterial).color.setHex(0xbcbeb8);
     (sideCreamPanel.material as THREE.MeshBasicMaterial).side = THREE.DoubleSide;
     bus.add(sideCreamPanel);
 
@@ -756,8 +756,9 @@ export class ProceduralGeometryFactory {
     steps.visible = false;
     bus.add(steps);
 
-    bus.position.set(3.55, 0, -10.15);
-    bus.rotation.y = -0.55;
+    bus.position.set(2.8, 0, -11.5);
+    bus.rotation.y = -0.45;
+    bus.scale.setScalar(0.72);
     return bus;
   }
 
@@ -1400,6 +1401,16 @@ export class ProceduralGeometryFactory {
     drainage.name = 'station_platform_drainage_visual';
     const drainMaterial = new THREE.MeshStandardMaterial({ color: 0x252d31, roughness: 0.52, metalness: 0.5 });
     drainage.add(this.box(5.25, 0.018, 0.075, drainMaterial, 3.42, 0.01, -2.46));
+    const curbMaterial = new THREE.MeshStandardMaterial({ color: 0x7a7f7d, roughness: 0.96, metalness: 0.02 });
+    const warningMaterial = new THREE.MeshStandardMaterial({ color: 0xa58b57, roughness: 0.88, metalness: 0.03 });
+    drainage.add(
+      this.box(0.18, 0.11, 13.3, curbMaterial, 1.02, 0.035, -9.25),
+      this.box(0.085, 0.02, 13.15, warningMaterial, 1.16, 0.082, -9.25),
+      this.box(0.12, 0.018, 13.15, drainMaterial, 0.86, 0.018, -9.25)
+    );
+    for (let index = 0; index < 25; index += 1) {
+      drainage.add(this.box(0.16, 0.024, 0.018, drainMaterial, 0.86, 0.028, -2.9 - index * 0.52));
+    }
     architecture.add(drainage);
 
     const platformPuddles = new THREE.Group();
@@ -1523,7 +1534,7 @@ export class ProceduralGeometryFactory {
     hangingLamps.name = 'station_hanging_lamps_visual';
     const lampMetal = new THREE.MeshStandardMaterial({ color: 0x6a625a, roughness: 0.72, metalness: 0.34 });
     const bulbMaterial = new THREE.MeshStandardMaterial({ color: 0xffe1ad, emissive: 0xffb968, emissiveIntensity: 2.2, roughness: 0.45 });
-    for (const [index, [x, z, drop]] of [[0.58, 0.25, 0.55], [-0.2, -3.75, 0.72], [0.3, -8.35, 0.64]].entries()) {
+    for (const [index, [x, z, drop]] of [[0.58, 0.25, 0.55], [-0.2, -3.75, 0.72], [-0.65, -8.35, 0.64]].entries()) {
       const lamp = new THREE.Group();
       lamp.name = `station_lamp_${index}`;
       lamp.position.set(x, 3.1, z);
@@ -1565,15 +1576,30 @@ export class ProceduralGeometryFactory {
 
     const benches = new THREE.Group();
     benches.name = 'station_benches_visual';
+    const benchFrameMaterial = new THREE.MeshStandardMaterial({ color: 0x445356, roughness: 0.54, metalness: 0.62 });
+    const benchSeatMaterial = new THREE.MeshStandardMaterial({ color: 0x527174, roughness: 0.82, metalness: 0.08 });
     for (const [index, [x, y, z, width, height]] of [
       [-1.72, 0.42, 1.25, 1.82, 0.83],
       [-1.74, 0.38, -1.45, 1.62, 0.74],
       [-1.68, 0.34, -4.35, 1.42, 0.65]
     ].entries()) {
-      const row = this.assetDecorPanel('/assets/generated/scene02_v4/s02_prop_waiting_bench_front.webp', width, height, 0.98);
+      const row = new THREE.Group();
       row.name = `station_bench_row_${index + 1}_visual`;
       row.position.set(x, y, z);
-      (row.material as THREE.MeshBasicMaterial).color.setHex(0x789396);
+      const benchImage = this.assetDecorPanel('/assets/generated/scene02_v4/s02_prop_waiting_bench_front.webp', width, height, 0.98);
+      benchImage.name = `station_bench_row_${index + 1}_image_visual`;
+      benchImage.position.z = 0.16;
+      (benchImage.material as THREE.MeshBasicMaterial).color.setHex(0x789396);
+      const seat = this.box(width * 0.92, 0.07, 0.42, benchSeatMaterial, 0, -height * 0.08, 0.02);
+      const rearBeam = this.box(width * 0.9, 0.07, 0.08, benchFrameMaterial, 0, height * 0.18, -0.08);
+      const lowerBeam = this.box(width * 0.82, 0.045, 0.07, benchFrameMaterial, 0, -height * 0.36, -0.04);
+      row.add(benchImage, seat, rearBeam, lowerBeam);
+      for (const legX of [-width * 0.34, width * 0.34]) {
+        row.add(
+          this.box(0.055, height * 0.5, 0.07, benchFrameMaterial, legX, -height * 0.24, -0.04),
+          this.box(0.28, 0.045, 0.08, benchFrameMaterial, legX, -height * 0.49, 0.03)
+        );
+      }
       benches.add(row);
     }
     root.add(benches);
@@ -1631,19 +1657,50 @@ export class ProceduralGeometryFactory {
     }
     root.add(stationProps);
 
+    const floorTraces = new THREE.Group();
+    floorTraces.name = 'station_floor_traces_visual';
+    const footprintMaterial = new THREE.MeshBasicMaterial({ color: 0x26363b, transparent: true, opacity: 0.2, depthWrite: false });
+    for (const [index, [x, z, angle]] of [
+      [-0.42, 1.05, -0.08],
+      [-0.22, 0.55, 0.05],
+      [-0.1, 0.02, -0.04],
+      [0.1, -0.52, 0.08],
+      [0.22, -1.08, 0],
+      [0.43, -1.64, 0.1],
+      [0.54, -2.18, 0.03]
+    ].entries()) {
+      const footprint = new THREE.Mesh(new THREE.CircleGeometry(0.075, 18), footprintMaterial.clone());
+      footprint.name = `station_wet_footprint_${index}_visual`;
+      footprint.rotation.x = -Math.PI / 2;
+      footprint.rotation.z = angle;
+      footprint.scale.set(0.62, 1.55, 1);
+      footprint.position.set(x + (index % 2 === 0 ? -0.07 : 0.07), 0.017, z);
+      floorTraces.add(footprint);
+    }
+    const paperMaterial = new THREE.MeshStandardMaterial({ color: 0xb2aaa0, roughness: 0.98, metalness: 0.01 });
+    for (const [x, z, rotation] of [[-0.2, -3.65, 0.18], [0.22, -5.52, -0.11]] as Array<[number, number, number]>) {
+      const paper = this.box(0.2, 0.008, 0.13, paperMaterial, x, 0.012, z);
+      paper.rotation.y = rotation;
+      floorTraces.add(paper);
+    }
+    root.add(floorTraces);
+
+    const boardFrameMaterial = new THREE.MeshStandardMaterial({ color: 0x252d31, roughness: 0.62, metalness: 0.5 });
+    const boardFrame = this.box(1.3, 0.5, 0.1, boardFrameMaterial, 0.12, 2.42, -6.35);
+    boardFrame.name = 'station_board_frame_visual';
     const board = this.assetPanel(
       '/assets/generated/scene02_v4/s02_prop_board_off.png',
-      1.24,
-      0.42,
+      1.14,
+      0.38,
       { x: 154, y: 230, width: 1740, height: 552, sourceHeight: 1024 }
     );
     board.name = 'board_visual';
-    board.position.set(0.18, 2.28, -6.15);
+    board.position.set(0.12, 2.42, -6.28);
     board.userData.onTexture = this.assetTexture(
       '/assets/generated/scene02_v4/s02_prop_board_on.png',
       { x: 151, y: 228, width: 1746, height: 556, sourceHeight: 1024 }
     );
-    root.add(board);
+    root.add(boardFrame, board);
 
     const ticket = this.assetPanel(
       '/assets/generated/scene02_v4/s02_prop_ticket_front_blank.png',
@@ -1682,18 +1739,36 @@ export class ProceduralGeometryFactory {
       '/assets/generated/scene02_v4/s02_prop_ticket_gate_accepted.png',
       { x: 516, y: 151, width: 1027, height: 1757 }
     );
-    const gateSlot = this.box(0.28, 0.055, 0.025, conduitMaterial, 0, 0.24, 0.035);
+    gatePanel.position.z = 0.205;
+    const gateShellMaterial = new THREE.MeshStandardMaterial({ color: 0x6c7677, roughness: 0.58, metalness: 0.5 });
+    const gateBaseMaterial = new THREE.MeshStandardMaterial({ color: 0x343b3d, roughness: 0.72, metalness: 0.36 });
+    const gateSlot = this.box(0.28, 0.055, 0.055, conduitMaterial, 0, 0.24, 0.24);
     gateSlot.name = 'gate_slot_visual';
-    gate.add(gatePanel, gateSlot);
-    gate.position.set(0.35, 0.48, -2.8);
-    gate.rotation.y = -0.08;
+    const gateBase = this.box(0.56, 0.12, 0.42, gateBaseMaterial, 0, -0.41, 0);
+    gateBase.name = 'gate_base_visual';
+    const gateCap = this.box(0.56, 0.1, 0.42, gateShellMaterial, 0, 0.41, 0);
+    gateCap.name = 'gate_cap_visual';
+    gate.add(
+      gatePanel,
+      gateSlot,
+      gateBase,
+      gateCap,
+      this.box(0.055, 0.76, 0.36, gateShellMaterial, -0.25, 0, 0),
+      this.box(0.055, 0.76, 0.36, gateShellMaterial, 0.25, 0, 0)
+    );
+    gate.position.set(0.72, 0.48, -3.05);
+    gate.rotation.y = -0.12;
 
     const busBody = this.stationBus3d();
+    busBody.updateMatrixWorld(true);
+    const busDoorWorld = busBody.localToWorld(new THREE.Vector3(1.205, 1.43, 2.1));
 
     const busContactShadow = new THREE.Group();
     busContactShadow.name = 'station_bus_contact_shadow_visual';
-    busContactShadow.position.set(3.55, 0.008, -10.15);
-    busContactShadow.rotation.y = -0.55;
+    busContactShadow.position.copy(busBody.position);
+    busContactShadow.position.y = 0.008;
+    busContactShadow.rotation.copy(busBody.rotation);
+    busContactShadow.scale.copy(busBody.scale);
     const busShadowMesh = new THREE.Mesh(
       new THREE.CircleGeometry(1, 40),
       new THREE.MeshBasicMaterial({ color: 0x10171b, transparent: true, opacity: 0.34, depthWrite: false })
@@ -1708,14 +1783,14 @@ export class ProceduralGeometryFactory {
       1.72,
       0.32,
       new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }),
-      3.48,
-      1.43,
-      -7.73
+      busDoorWorld.x,
+      busDoorWorld.y,
+      busDoorWorld.z
     );
     busDoorProxy.name = 'exit_bus_door_visual';
-    const busFillLight = new THREE.PointLight(0xb8d0e1, 0.88, 10, 1.7);
+    const busFillLight = new THREE.PointLight(0xb8d0e1, 0.54, 8, 1.7);
     busFillLight.name = 'station_bus_fill_light_visual';
-    busFillLight.position.set(5.2, 2.65, -6.4);
+    busFillLight.position.set(2.65, 2.15, -9.15);
     root.add(gate, busContactShadow, busBody, busDoorProxy, busFillLight);
 
     const farPlant = new THREE.Group();
@@ -1785,9 +1860,9 @@ export class ProceduralGeometryFactory {
     root.add(atmosphere);
 
     this.addHotspot(root, hotspots, 'hotspot_ticket', new THREE.Vector3(-1.22, 0.48, 1.29), new THREE.Vector3(0.32, 0.15, 0.18));
-    this.addHotspot(root, hotspots, 'hotspot_board', new THREE.Vector3(0.18, 2.28, -6.15), new THREE.Vector3(1.24, 0.42, 0.18));
-    this.addHotspot(root, hotspots, 'hotspot_gate', new THREE.Vector3(0.35, 0.48, -2.8), new THREE.Vector3(0.52, 0.92, 0.3));
-    this.addHotspot(root, hotspots, 'exit_bus_door', new THREE.Vector3(3.48, 1.43, -7.73), new THREE.Vector3(0.76, 1.8, 0.36));
+    this.addHotspot(root, hotspots, 'hotspot_board', new THREE.Vector3(0.12, 2.42, -6.28), new THREE.Vector3(1.2, 0.44, 0.18));
+    this.addHotspot(root, hotspots, 'hotspot_gate', new THREE.Vector3(0.72, 0.48, -3.05), new THREE.Vector3(0.62, 1.02, 0.44));
+    this.addHotspot(root, hotspots, 'exit_bus_door', busDoorWorld, new THREE.Vector3(0.72, 1.52, 0.38));
   }
 
   private createBuildingStairs(stepMaterial: THREE.Material, railMaterial: THREE.Material): THREE.Group {
