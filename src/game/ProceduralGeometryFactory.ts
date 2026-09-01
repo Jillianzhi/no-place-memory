@@ -842,7 +842,7 @@ export class ProceduralGeometryFactory {
     steps.visible = false;
     bus.add(steps);
 
-    bus.position.set(1.3, 0, -9.4);
+    bus.position.set(1.62, 0, -9.4);
     return bus;
   }
 
@@ -1874,7 +1874,7 @@ export class ProceduralGeometryFactory {
     busDoorProxy.name = 'exit_bus_door_visual';
     const busFillLight = new THREE.PointLight(0xb8d0e1, 0.54, 8, 1.7);
     busFillLight.name = 'station_bus_fill_light_visual';
-    busFillLight.position.set(2.55, 1.45, -9.1);
+    busFillLight.position.set(2.87, 1.45, -9.1);
     root.add(gate, busContactShadow, busBody, busDoorProxy, busFillLight);
 
     const farPlant = new THREE.Group();
