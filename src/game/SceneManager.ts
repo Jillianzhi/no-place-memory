@@ -1504,14 +1504,14 @@ export class SceneManager {
     const right = this.findVisual('station_bus_door_right_visual');
     const divider = this.findVisual('station_bus_door_divider_visual');
     if (left) {
-      left.rotation.y = -1.05;
-      left.position.x = 0.31;
-      left.position.z = -0.42;
+      left.rotation.y = 0;
+      left.position.x = -0.3;
+      left.position.z = 0.055;
     }
     if (right) {
-      right.rotation.y = 1.05;
-      right.position.x = 0.31;
-      right.position.z = 0.42;
+      right.rotation.y = 0;
+      right.position.x = 0.3;
+      right.position.z = 0.055;
     }
     if (divider) divider.visible = false;
     this.setVisualVisible('station_bus_steps_visual', true);
