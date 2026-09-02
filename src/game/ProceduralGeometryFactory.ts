@@ -1487,7 +1487,7 @@ export class ProceduralGeometryFactory {
     const drainMaterial = new THREE.MeshStandardMaterial({ color: 0x252d31, roughness: 0.52, metalness: 0.5 });
     drainage.add(this.box(5.25, 0.018, 0.075, drainMaterial, 3.42, 0.01, -2.46));
     const curbMaterial = new THREE.MeshStandardMaterial({ color: 0x7a7f7d, roughness: 0.96, metalness: 0.02 });
-    const warningMaterial = new THREE.MeshStandardMaterial({ color: 0xa58b57, roughness: 0.88, metalness: 0.03 });
+    const warningMaterial = new THREE.MeshStandardMaterial({ color: 0x776d52, roughness: 0.9, metalness: 0.03 });
     drainage.add(
       this.box(0.18, 0.11, 13.3, curbMaterial, 1.02, 0.035, -9.25),
       this.box(0.085, 0.02, 13.15, warningMaterial, 1.16, 0.082, -9.25),
@@ -1813,36 +1813,104 @@ export class ProceduralGeometryFactory {
 
     const gate = new THREE.Group();
     gate.name = 'gate_visual';
-    const gatePanel = this.assetPanel(
-      '/assets/generated/scene02_v4/s02_prop_ticket_gate_closed.png',
-      0.46,
-      0.88,
-      { x: 517, y: 153, width: 1023, height: 1753 }
-    );
-    gatePanel.name = 'gate_image_visual';
-    gatePanel.userData.acceptedTexture = this.assetTexture(
-      '/assets/generated/scene02_v4/s02_prop_ticket_gate_accepted.png',
-      { x: 516, y: 151, width: 1027, height: 1757 }
-    );
-    gatePanel.position.z = 0.205;
-    const gateShellMaterial = new THREE.MeshStandardMaterial({ color: 0x6c7677, roughness: 0.58, metalness: 0.5 });
-    const gateBaseMaterial = new THREE.MeshStandardMaterial({ color: 0x343b3d, roughness: 0.72, metalness: 0.36 });
-    const gateSlot = this.box(0.28, 0.055, 0.055, conduitMaterial, 0, 0.24, 0.24);
-    gateSlot.name = 'gate_slot_visual';
-    const gateBase = this.box(0.56, 0.12, 0.42, gateBaseMaterial, 0, -0.41, 0);
+    const gatePaint = new THREE.MeshStandardMaterial({ color: 0x718083, roughness: 0.78, metalness: 0.38 });
+    const gatePaintDark = new THREE.MeshStandardMaterial({ color: 0x465256, roughness: 0.84, metalness: 0.32 });
+    const gateEdge = new THREE.MeshStandardMaterial({ color: 0xa1a6a1, roughness: 0.54, metalness: 0.58 });
+    const gateRust = new THREE.MeshStandardMaterial({ color: 0x5c3528, roughness: 0.96, metalness: 0.08 });
+    const gateEnamel = new THREE.MeshStandardMaterial({ color: 0xb0aa92, roughness: 0.82, metalness: 0.12 });
+
+    const gateBody = this.box(0.43, 0.66, 0.34, gatePaint, 0, 0, 0);
+    gateBody.name = 'gate_body_visual';
+    const gateFront = this.box(0.35, 0.47, 0.025, gatePaintDark, 0, -0.035, 0.184);
+    gateFront.name = 'gate_front_panel_visual';
+    const gateBase = this.box(0.49, 0.09, 0.39, gatePaintDark, 0, -0.375, 0);
     gateBase.name = 'gate_base_visual';
-    const gateCap = this.box(0.56, 0.1, 0.42, gateShellMaterial, 0, 0.41, 0);
+    const gateCap = this.box(0.47, 0.16, 0.36, gatePaint, 0, 0.385, 0);
     gateCap.name = 'gate_cap_visual';
+    const gateSlot = this.box(0.24, 0.018, 0.08, gatePaintDark.clone(), 0.035, 0.472, 0.02);
+    gateSlot.name = 'gate_slot_visual';
+    const slotLipTop = this.box(0.29, 0.014, 0.025, gateEdge, 0.035, 0.477, -0.045);
+    const slotLipBottom = this.box(0.29, 0.014, 0.025, gateEdge, 0.035, 0.477, 0.085);
+    const labelPlate = this.box(0.19, 0.09, 0.018, gateEnamel, 0.025, 0.075, 0.207);
+    labelPlate.name = 'gate_label_plate_visual';
+
+    const redLensMaterial = new THREE.MeshStandardMaterial({
+      color: 0x6f2520,
+      roughness: 0.35,
+      metalness: 0.05,
+      emissive: 0x3c0906,
+      emissiveIntensity: 0.85
+    });
+    const greenLensMaterial = new THREE.MeshStandardMaterial({
+      color: 0x7fa18b,
+      roughness: 0.28,
+      metalness: 0.04,
+      emissive: 0x5cd98b,
+      emissiveIntensity: 2.4
+    });
+    const indicatorHousing = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.035, 18), gatePaintDark);
+    indicatorHousing.position.set(-0.13, 0.355, 0.192);
+    indicatorHousing.rotation.x = Math.PI / 2;
+    const redIndicator = new THREE.Mesh(new THREE.CylinderGeometry(0.036, 0.036, 0.04, 18), redLensMaterial);
+    redIndicator.name = 'gate_indicator_red_visual';
+    redIndicator.position.set(-0.13, 0.355, 0.214);
+    redIndicator.rotation.x = Math.PI / 2;
+    const greenIndicator = new THREE.Mesh(new THREE.CylinderGeometry(0.036, 0.036, 0.04, 18), greenLensMaterial);
+    greenIndicator.name = 'gate_indicator_green_visual';
+    greenIndicator.position.copy(redIndicator.position);
+    greenIndicator.rotation.copy(redIndicator.rotation);
+    greenIndicator.visible = false;
+    const indicatorLight = new THREE.PointLight(0x7ff5a5, 0.28, 0.72, 1.9);
+    indicatorLight.name = 'gate_indicator_light_visual';
+    indicatorLight.position.set(-0.13, 0.355, 0.4);
+    indicatorLight.visible = false;
+
+    const gateBarrier = new THREE.Group();
+    gateBarrier.name = 'gate_barrier_visual';
+    gateBarrier.position.set(0.23, 0.205, 0.04);
+    const pivot = new THREE.Mesh(new THREE.CylinderGeometry(0.062, 0.062, 0.18, 16), gatePaintDark);
+    pivot.name = 'gate_barrier_pivot_visual';
+    const arm = this.box(0.68, 0.05, 0.055, gatePaintDark, 0.34, 0, 0);
+    arm.name = 'gate_barrier_arm_visual';
+    const armBandA = this.box(0.11, 0.054, 0.059, gateEnamel, 0.23, 0, 0);
+    const armBandB = this.box(0.11, 0.054, 0.059, gateEnamel, 0.5, 0, 0);
+    const armTip = new THREE.Mesh(new THREE.SphereGeometry(0.035, 12, 8), gateRust);
+    armTip.position.set(0.69, 0, 0);
+    gateBarrier.add(pivot, arm, armBandA, armBandB, armTip);
+
+    for (const [x, y, width, height] of [
+      [-0.155, -0.22, 0.06, 0.025],
+      [0.14, -0.16, 0.045, 0.02],
+      [-0.12, 0.12, 0.035, 0.018],
+      [0.13, 0.17, 0.055, 0.022]
+    ] as Array<[number, number, number, number]>) {
+      const chip = this.box(width, height, 0.012, gateRust, x, y, 0.205);
+      chip.rotation.z = x * 0.9;
+      gate.add(chip);
+    }
+    for (const [x, y] of [[-0.165, -0.235], [0.165, -0.235], [-0.165, 0.185], [0.165, 0.185]] as Array<[number, number]>) {
+      const bolt = new THREE.Mesh(new THREE.SphereGeometry(0.013, 10, 6), gateEdge);
+      bolt.position.set(x, y, 0.21);
+      gate.add(bolt);
+    }
+
     gate.add(
-      gatePanel,
-      gateSlot,
+      gateBody,
+      gateFront,
       gateBase,
       gateCap,
-      this.box(0.055, 0.76, 0.36, gateShellMaterial, -0.25, 0, 0),
-      this.box(0.055, 0.76, 0.36, gateShellMaterial, 0.25, 0, 0)
+      gateSlot,
+      slotLipTop,
+      slotLipBottom,
+      labelPlate,
+      indicatorHousing,
+      redIndicator,
+      greenIndicator,
+      indicatorLight,
+      gateBarrier
     );
-    gate.position.set(0.72, 0.48, -3.05);
-    gate.rotation.y = -0.12;
+    gate.position.set(0.72, 0.43, -3.35);
+    gate.rotation.y = -0.08;
 
     const busBody = this.stationBusSideProfile();
     busBody.updateMatrixWorld(true);
@@ -1946,7 +2014,7 @@ export class ProceduralGeometryFactory {
 
     this.addHotspot(root, hotspots, 'hotspot_ticket', new THREE.Vector3(-1.22, 0.48, 1.29), new THREE.Vector3(0.32, 0.15, 0.18));
     this.addHotspot(root, hotspots, 'hotspot_board', new THREE.Vector3(0.12, 2.42, -6.28), new THREE.Vector3(1.2, 0.44, 0.18));
-    this.addHotspot(root, hotspots, 'hotspot_gate', new THREE.Vector3(0.72, 0.48, -3.05), new THREE.Vector3(0.62, 1.02, 0.44));
+    this.addHotspot(root, hotspots, 'hotspot_gate', new THREE.Vector3(0.72, 0.43, -3.35), new THREE.Vector3(1.04, 0.84, 0.42));
     this.addHotspot(root, hotspots, 'exit_bus_door', busDoorWorld, new THREE.Vector3(0.62, 1.18, 0.36));
   }
 

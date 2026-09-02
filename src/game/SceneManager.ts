@@ -40,7 +40,7 @@ const portraitLayouts: Record<SceneDefinition['id'], PortraitSceneLayout> = {
       { name: 'station_bench_row_3_visual', position: [-1.32, 0.38, -4.18], size: [1.04, 0.51, 0.34] },
       { name: 'ticket_visual', position: [-0.65, 0.55, 0.2], size: [0.34, 0.16, 0.02] },
       { name: 'station_ticket_glow_visual', position: [-0.65, 0.55, 0.185], size: [0.48, 0.26, 0.02] },
-      { name: 'gate_visual', position: [0.7, 0.49, -2.92], size: [0.58, 0.98, 0.4] },
+      { name: 'gate_visual', position: [0.72, 0.43, -3.35], size: [1.04, 0.84, 0.42] },
       { name: 'station_board_frame_visual', position: [0.08, 2.42, -6.28], size: [1.34, 0.5, 0.12] },
       { name: 'board_visual', position: [0.08, 2.42, -6.22], size: [1.18, 0.4, 0.02] },
       { name: 'station_luggage_1_visual', position: [-0.52, 0.24, -4.92], size: [0.42, 0.48, 0.24] },
@@ -722,9 +722,9 @@ export class SceneManager {
       if (checked) {
         flags.checked = true;
         this.onMessage('车票被检过，终点仍然空着。');
-        this.moveVisual('ticket_visual', this.layoutPoint(new THREE.Vector3(0.72, 0.72, -2.98), new THREE.Vector3(0.7, 0.72, -2.86)));
+        this.moveVisual('ticket_visual', this.layoutPoint(new THREE.Vector3(0.72, 0.82, -3.31), new THREE.Vector3(0.72, 0.82, -3.31)));
         this.syncHotspotToVisual('hotspot_ticket', 'ticket_visual');
-        this.swapVisualTexture('gate_image_visual', 'acceptedTexture');
+        this.showAcceptedStationGate();
         this.setHotspotEnabled('hotspot_ticket', false);
         this.setHotspotEnabled('hotspot_gate', false);
       } else {
@@ -1234,7 +1234,7 @@ export class SceneManager {
     if (this.currentDefinition.id === 'scene02_station') {
       const flags = this.currentState.flags;
       if (flags.board) this.swapVisualTexture('board_visual', 'onTexture');
-      if (flags.checked) this.swapVisualTexture('gate_image_visual', 'acceptedTexture');
+      if (flags.checked) this.showAcceptedStationGate();
       if (flags.stationFinished) this.showOpenBusDoor();
       this.setVisualVisible('station_ticket_glow_visual', !flags.checked && !flags.ticket);
       this.setHotspotEnabled('hotspot_ticket', !flags.checked);
@@ -1517,6 +1517,21 @@ export class SceneManager {
     this.setVisualVisible('station_bus_steps_visual', true);
     this.setVisualVisible('station_bus_door_light_visual', true);
     this.setVisualVisible('station_bus_doorway_glow_visual', true);
+  }
+
+  private showAcceptedStationGate(): void {
+    const barrier = this.findVisual('gate_barrier_visual');
+    if (barrier) barrier.rotation.y = -1.18;
+    this.setVisualVisible('gate_indicator_red_visual', false);
+    this.setVisualVisible('gate_indicator_green_visual', true);
+    this.setVisualVisible('gate_indicator_light_visual', true);
+
+    const slot = this.findVisual('gate_slot_visual') as THREE.Mesh | null;
+    if (!slot || Array.isArray(slot.material)) return;
+    const material = slot.material as THREE.MeshStandardMaterial;
+    material.color.setHex(0x31453a);
+    material.emissive.setHex(0x4db276);
+    material.emissiveIntensity = 0.75;
   }
 
   private showBuildingChange(): void {
