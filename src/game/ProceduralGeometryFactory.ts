@@ -130,33 +130,48 @@ export class ProceduralGeometryFactory {
     );
   }
 
-  private stationNoticeTextPanel(lines: readonly string[], footer: string, width: number, height: number, color: string): THREE.Mesh {
-    const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 768;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) throw new Error('Canvas 2D unavailable.');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = color;
-    ctx.globalAlpha = 0.9;
-    ctx.font = '900 76px "Songti SC", "STSong", serif';
-    lines.forEach((line, index) => ctx.fillText(line, canvas.width / 2, 300 + index * 105));
-    ctx.globalAlpha = 0.68;
-    ctx.font = '700 28px "Songti SC", "STSong", serif';
-    ctx.fillText(footer, canvas.width / 2, 570);
-    ctx.fillRect(112, 615, 288, 5);
+  private stationPoster(path: string, width: number, height: number, renderOrder: number): THREE.Group {
+    const poster = new THREE.Group();
 
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.colorSpace = THREE.SRGBColorSpace;
-    texture.anisotropy = 8;
-    const panel = new THREE.Mesh(
-      new THREE.PlaneGeometry(width, height),
-      new THREE.MeshBasicMaterial({ map: texture, transparent: true, depthWrite: false, toneMapped: false })
+    const oldPaper = new THREE.Mesh(
+      new THREE.PlaneGeometry(width * 1.035, height * 1.025),
+      new THREE.MeshBasicMaterial({ color: 0x6a5b46, transparent: true, opacity: 0.46, depthWrite: false })
     );
-    panel.renderOrder = 42;
-    return panel;
+    oldPaper.position.set(0.018, -0.018, -0.004);
+    oldPaper.renderOrder = renderOrder - 1;
+
+    const print = this.assetPanel(path, width, height);
+    const printMaterial = print.material as THREE.MeshBasicMaterial;
+    printMaterial.transparent = false;
+    printMaterial.depthWrite = true;
+    printMaterial.color.setHex(0xddd0b9);
+    print.renderOrder = renderOrder;
+
+    const tapeMaterial = new THREE.MeshBasicMaterial({
+      color: 0xc9b98f,
+      transparent: true,
+      opacity: 0.48,
+      depthWrite: false
+    });
+    const tape = new THREE.Mesh(new THREE.PlaneGeometry(width * 0.24, Math.max(0.035, height * 0.045)), tapeMaterial);
+    tape.position.set(renderOrder % 2 === 0 ? -width * 0.31 : width * 0.31, height * 0.49, 0.008);
+    tape.rotation.z = renderOrder % 2 === 0 ? -0.13 : 0.11;
+    tape.renderOrder = renderOrder + 1;
+
+    const foldedCornerShape = new THREE.Shape();
+    foldedCornerShape.moveTo(0, 0);
+    foldedCornerShape.lineTo(width * 0.13, 0);
+    foldedCornerShape.lineTo(width * 0.13, height * 0.11);
+    foldedCornerShape.closePath();
+    const foldedCorner = new THREE.Mesh(
+      new THREE.ShapeGeometry(foldedCornerShape),
+      new THREE.MeshBasicMaterial({ color: 0xb7a57e, transparent: true, opacity: 0.72, depthWrite: false, side: THREE.DoubleSide })
+    );
+    foldedCorner.position.set(width * 0.37, -height * 0.5, 0.009);
+    foldedCorner.renderOrder = renderOrder + 1;
+
+    poster.add(oldPaper, print, tape, foldedCorner);
+    return poster;
   }
 
   private mappedMaterial(path: string, repeatX = 1, repeatY = 1, roughness = 0.86): THREE.MeshStandardMaterial {
@@ -1606,44 +1621,57 @@ export class ProceduralGeometryFactory {
 
     const notices = new THREE.Group();
     notices.name = 'station_vintage_notices_visual';
-    const noticeAtlas = '/assets/generated/scene02_v9/s02_vintage_notice_atlas_v1.jpg';
-    const noticeConfigs = [
-      {
-        x: -2.68,
-        crop: { x: 14, y: 14, width: 572, height: 858, sourceWidth: 1774, sourceHeight: 887 },
-        lines: ['文明候车', '秩序上车'],
-        footer: '讲秩序  保安全',
-        color: '#a1372c',
-        rotation: -0.012
-      },
-      {
-        x: -1.97,
-        crop: { x: 598, y: 14, width: 575, height: 858, sourceWidth: 1774, sourceHeight: 887 },
-        lines: ['安全第一', '旅途平安'],
-        footer: '县汽车站宣',
-        color: '#315675',
-        rotation: 0.008
-      },
-      {
-        x: -1.26,
-        crop: { x: 1186, y: 14, width: 573, height: 858, sourceWidth: 1774, sourceHeight: 887 },
-        lines: ['爱护公物', '讲究卫生'],
-        footer: '共同维护候车秩序',
-        color: '#a1372c',
-        rotation: -0.006
-      }
+    const posterRoot = '/assets/generated/scene02_v13/posters';
+    const farWallPosters = [
+      { file: 'bus_travel.jpg', x: -2.82, y: 1.75, width: 0.78, height: 1.17, rotation: -0.11 },
+      { file: 'color_tv.jpg', x: -2.17, y: 1.86, width: 0.76, height: 1.14, rotation: 0.08 },
+      { file: 'washing_powder.jpg', x: -1.48, y: 1.78, width: 0.72, height: 1.08, rotation: -0.07 },
+      { file: 'orange_soda.jpg', x: -2.54, y: 2.2, width: 0.58, height: 0.87, rotation: 0.16 },
+      { file: 'biscuits.jpg', x: -2.42, y: 1.28, width: 0.62, height: 0.93, rotation: -0.14 },
+      { file: 'bicycle.jpg', x: -1.91, y: 2.18, width: 0.57, height: 0.86, rotation: 0.12 },
+      { file: 'cassette_radio.jpg', x: -1.36, y: 1.28, width: 0.62, height: 0.93, rotation: 0.14 },
+      { file: 'toothpaste.jpg', x: -0.91, y: 1.98, width: 0.54, height: 0.81, rotation: -0.12 },
+      { file: 'table_fan.jpg', x: -1.02, y: 1.11, width: 0.5, height: 0.75, rotation: 0.09 }
     ] as const;
-    for (const [index, config] of noticeConfigs.entries()) {
-      const notice = new THREE.Group();
-      notice.name = `station_vintage_notice_${index + 1}_visual`;
-      notice.position.set(config.x, 1.68, -11.745);
-      notice.rotation.z = config.rotation;
-      const paper = this.assetDecorPanel(noticeAtlas, 0.62, 0.94, 0.97, config.crop);
-      paper.renderOrder = 41;
-      const lettering = this.stationNoticeTextPanel(config.lines, config.footer, 0.62, 0.94, config.color);
-      lettering.position.z = 0.006;
-      notice.add(paper, lettering);
-      notices.add(notice);
+    farWallPosters.forEach((config, index) => {
+      const poster = this.stationPoster(`${posterRoot}/${config.file}`, config.width, config.height, 50 + index * 3);
+      poster.name = `station_far_wall_poster_${index + 1}_visual`;
+      poster.position.set(config.x, config.y, -11.742 + index * 0.003);
+      poster.rotation.z = config.rotation;
+      notices.add(poster);
+    });
+
+    const leftWallPosters = [
+      { file: 'cassette_radio.jpg', z: -4.02, y: 1.63, width: 0.72, height: 1.08, rotation: -0.075 },
+      { file: 'toothpaste.jpg', z: -4.58, y: 1.38, width: 0.58, height: 0.87, rotation: 0.095 },
+      { file: 'table_fan.jpg', z: -6.95, y: 1.68, width: 0.7, height: 1.05, rotation: 0.06 },
+      { file: 'sewing_machine.jpg', z: -7.53, y: 1.42, width: 0.6, height: 0.9, rotation: -0.11 },
+      { file: 'beauty_salon.jpg', z: -9.92, y: 1.72, width: 0.62, height: 0.88, rotation: 0.085 }
+    ] as const;
+    leftWallPosters.forEach((config, index) => {
+      const mount = new THREE.Group();
+      mount.name = `station_left_wall_poster_${index + 1}_visual`;
+      mount.position.set(-3.065 + index * 0.0015, config.y, config.z);
+      mount.rotation.y = Math.PI / 2;
+      const poster = this.stationPoster(`${posterRoot}/${config.file}`, config.width, config.height, 72 + index * 3);
+      poster.rotation.z = config.rotation;
+      poster.position.z = index * 0.002;
+      mount.add(poster);
+      notices.add(mount);
+    });
+
+    const residueMaterial = new THREE.MeshBasicMaterial({ color: 0xb8a987, transparent: true, opacity: 0.42, depthWrite: false });
+    for (const [x, y, width, height, rotation] of [
+      [-2.95, 2.45, 0.24, 0.12, -0.18],
+      [-2.25, 1.05, 0.32, 0.15, 0.09],
+      [-1.16, 2.47, 0.26, 0.11, -0.08],
+      [-1.47, 1.03, 0.18, 0.09, 0.16]
+    ] as Array<[number, number, number, number, number]>) {
+      const residue = new THREE.Mesh(new THREE.PlaneGeometry(width, height), residueMaterial);
+      residue.position.set(x, y, -11.751);
+      residue.rotation.z = rotation;
+      residue.renderOrder = 44;
+      notices.add(residue);
     }
     root.add(notices);
 
