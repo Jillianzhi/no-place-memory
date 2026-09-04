@@ -1490,29 +1490,31 @@ export class ProceduralGeometryFactory {
       if (legacy) legacy.visible = false;
     }
 
-    const stationPlasterPath = '/assets/generated/scene02_v9/s02_warm_aged_plaster_v1.jpg';
-    const upperWall = this.mappedMaterial(stationPlasterPath, 1.65, 2.25, 0.97);
-    upperWall.color.setHex(0xd6d0c2);
-    upperWall.emissive.setHex(0x4f4b45);
-    upperWall.emissiveIntensity = 0.13;
+    const upperWallPath = '/assets/generated/scene02_v14/s02_upper_wall_peeling.jpg';
+    const lowerWallPath = '/assets/generated/scene02_v14/s02_lower_wall_chipped_teal.jpg';
+    const ceilingPath = '/assets/generated/scene02_v14/s02_ceiling_water_stains.jpg';
+    const upperWall = this.mappedMaterial(upperWallPath, 1.45, 2.1, 0.99);
+    upperWall.color.setHex(0xd0cbc1);
+    upperWall.emissive.setHex(0x45423d);
+    upperWall.emissiveIntensity = 0.11;
     upperWall.bumpMap = upperWall.map;
-    upperWall.bumpScale = 0.018;
-    const lowerWall = this.mappedMaterial(stationPlasterPath, 1.7, 2.35, 0.98);
-    lowerWall.color.setHex(0x65817f);
-    lowerWall.emissive.setHex(0x2f4544);
-    lowerWall.emissiveIntensity = 0.14;
+    upperWall.bumpScale = 0.022;
+    const lowerWall = this.mappedMaterial(lowerWallPath, 1.55, 2.25, 0.99);
+    lowerWall.color.setHex(0xc0c9c4);
+    lowerWall.emissive.setHex(0x2d3b38);
+    lowerWall.emissiveIntensity = 0.1;
     lowerWall.bumpMap = lowerWall.map;
-    lowerWall.bumpScale = 0.014;
+    lowerWall.bumpScale = 0.019;
     const floorMaterial = this.mappedMaterial('/assets/generated/scene02_v4/s02_floor_wet_terrazzo_basecolor.jpg', 2.4, 12, 0.5);
     floorMaterial.color.setHex(0xb1aaa0);
     floorMaterial.emissive.setHex(0x414747);
     floorMaterial.emissiveIntensity = 0.16;
-    const ceilingMaterial = this.mappedMaterial(stationPlasterPath, 2.1, 8.5, 0.98);
-    ceilingMaterial.color.setHex(0xbab2a7);
-    ceilingMaterial.emissive.setHex(0x48443f);
-    ceilingMaterial.emissiveIntensity = 0.13;
+    const ceilingMaterial = this.mappedMaterial(ceilingPath, 2.0, 7.2, 0.99);
+    ceilingMaterial.color.setHex(0xc4beb4);
+    ceilingMaterial.emissive.setHex(0x44413b);
+    ceilingMaterial.emissiveIntensity = 0.115;
     ceilingMaterial.bumpMap = ceilingMaterial.map;
-    ceilingMaterial.bumpScale = 0.012;
+    ceilingMaterial.bumpScale = 0.017;
 
     const outsideFloorMaterial = this.stationOutdoorGroundMaterial();
 
