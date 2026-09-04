@@ -130,6 +130,35 @@ export class ProceduralGeometryFactory {
     );
   }
 
+  private stationNoticeTextPanel(lines: readonly string[], footer: string, width: number, height: number, color: string): THREE.Mesh {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 768;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Canvas 2D unavailable.');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = color;
+    ctx.globalAlpha = 0.9;
+    ctx.font = '900 76px "Songti SC", "STSong", serif';
+    lines.forEach((line, index) => ctx.fillText(line, canvas.width / 2, 300 + index * 105));
+    ctx.globalAlpha = 0.68;
+    ctx.font = '700 28px "Songti SC", "STSong", serif';
+    ctx.fillText(footer, canvas.width / 2, 570);
+    ctx.fillRect(112, 615, 288, 5);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.anisotropy = 8;
+    const panel = new THREE.Mesh(
+      new THREE.PlaneGeometry(width, height),
+      new THREE.MeshBasicMaterial({ map: texture, transparent: true, depthWrite: false, toneMapped: false })
+    );
+    panel.renderOrder = 42;
+    return panel;
+  }
+
   private mappedMaterial(path: string, repeatX = 1, repeatY = 1, roughness = 0.86): THREE.MeshStandardMaterial {
     const texture = this.assetTexture(path);
     texture.wrapS = THREE.RepeatWrapping;
@@ -1446,22 +1475,29 @@ export class ProceduralGeometryFactory {
       if (legacy) legacy.visible = false;
     }
 
-    const upperWall = this.mappedMaterial('/assets/generated/scene02_v4/s02_wall_basecolor.jpg', 1.8, 2.4, 0.96);
-    upperWall.color.setHex(0xe0dddd);
-    upperWall.emissive.setHex(0x62676b);
-    upperWall.emissiveIntensity = 0.18;
-    const lowerWall = this.mappedMaterial('/assets/generated/scene02_v4/s02_wall_basecolor.jpg', 1.8, 2.4, 0.98);
-    lowerWall.color.setHex(0x78989a);
-    lowerWall.emissive.setHex(0x344d50);
-    lowerWall.emissiveIntensity = 0.16;
+    const stationPlasterPath = '/assets/generated/scene02_v9/s02_warm_aged_plaster_v1.jpg';
+    const upperWall = this.mappedMaterial(stationPlasterPath, 1.65, 2.25, 0.97);
+    upperWall.color.setHex(0xd6d0c2);
+    upperWall.emissive.setHex(0x4f4b45);
+    upperWall.emissiveIntensity = 0.13;
+    upperWall.bumpMap = upperWall.map;
+    upperWall.bumpScale = 0.018;
+    const lowerWall = this.mappedMaterial(stationPlasterPath, 1.7, 2.35, 0.98);
+    lowerWall.color.setHex(0x65817f);
+    lowerWall.emissive.setHex(0x2f4544);
+    lowerWall.emissiveIntensity = 0.14;
+    lowerWall.bumpMap = lowerWall.map;
+    lowerWall.bumpScale = 0.014;
     const floorMaterial = this.mappedMaterial('/assets/generated/scene02_v4/s02_floor_wet_terrazzo_basecolor.jpg', 2.4, 12, 0.5);
-    floorMaterial.color.setHex(0xd1d4d2);
-    floorMaterial.emissive.setHex(0x4e5759);
-    floorMaterial.emissiveIntensity = 0.2;
-    const ceilingMaterial = this.mappedMaterial('/assets/generated/scene02_v4/s02_ceiling_basecolor.jpg', 2.2, 9, 0.98);
-    ceilingMaterial.color.setHex(0xc5c1c2);
-    ceilingMaterial.emissive.setHex(0x545457);
-    ceilingMaterial.emissiveIntensity = 0.16;
+    floorMaterial.color.setHex(0xb1aaa0);
+    floorMaterial.emissive.setHex(0x414747);
+    floorMaterial.emissiveIntensity = 0.16;
+    const ceilingMaterial = this.mappedMaterial(stationPlasterPath, 2.1, 8.5, 0.98);
+    ceilingMaterial.color.setHex(0xbab2a7);
+    ceilingMaterial.emissive.setHex(0x48443f);
+    ceilingMaterial.emissiveIntensity = 0.13;
+    ceilingMaterial.bumpMap = ceilingMaterial.map;
+    ceilingMaterial.bumpScale = 0.012;
 
     const outsideFloorMaterial = this.stationOutdoorGroundMaterial();
 
@@ -1568,6 +1604,49 @@ export class ProceduralGeometryFactory {
     farWall.add(farPassage);
     architecture.add(farWall);
 
+    const notices = new THREE.Group();
+    notices.name = 'station_vintage_notices_visual';
+    const noticeAtlas = '/assets/generated/scene02_v9/s02_vintage_notice_atlas_v1.jpg';
+    const noticeConfigs = [
+      {
+        x: -2.68,
+        crop: { x: 14, y: 14, width: 572, height: 858, sourceWidth: 1774, sourceHeight: 887 },
+        lines: ['文明候车', '秩序上车'],
+        footer: '讲秩序  保安全',
+        color: '#a1372c',
+        rotation: -0.012
+      },
+      {
+        x: -1.97,
+        crop: { x: 598, y: 14, width: 575, height: 858, sourceWidth: 1774, sourceHeight: 887 },
+        lines: ['安全第一', '旅途平安'],
+        footer: '县汽车站宣',
+        color: '#315675',
+        rotation: 0.008
+      },
+      {
+        x: -1.26,
+        crop: { x: 1186, y: 14, width: 573, height: 858, sourceWidth: 1774, sourceHeight: 887 },
+        lines: ['爱护公物', '讲究卫生'],
+        footer: '共同维护候车秩序',
+        color: '#a1372c',
+        rotation: -0.006
+      }
+    ] as const;
+    for (const [index, config] of noticeConfigs.entries()) {
+      const notice = new THREE.Group();
+      notice.name = `station_vintage_notice_${index + 1}_visual`;
+      notice.position.set(config.x, 1.68, -11.745);
+      notice.rotation.z = config.rotation;
+      const paper = this.assetDecorPanel(noticeAtlas, 0.62, 0.94, 0.97, config.crop);
+      paper.renderOrder = 41;
+      const lettering = this.stationNoticeTextPanel(config.lines, config.footer, 0.62, 0.94, config.color);
+      lettering.position.z = 0.006;
+      notice.add(paper, lettering);
+      notices.add(notice);
+    }
+    root.add(notices);
+
     const conduitMaterial = new THREE.MeshStandardMaterial({ color: 0x4c5152, roughness: 0.66, metalness: 0.42 });
     const conduit = this.cylinderBetween(new THREE.Vector3(2.94, 2.75, 3.5), new THREE.Vector3(2.94, 2.75, -2.4), 0.025, conduitMaterial, 10);
     conduit.name = 'station_conduit_visual';
@@ -1617,23 +1696,42 @@ export class ProceduralGeometryFactory {
 
     const hangingLamps = new THREE.Group();
     hangingLamps.name = 'station_hanging_lamps_visual';
-    const lampMetal = new THREE.MeshStandardMaterial({ color: 0x6a625a, roughness: 0.72, metalness: 0.34 });
+    const lampMetal = new THREE.MeshStandardMaterial({ color: 0x4d4037, roughness: 0.58, metalness: 0.48, side: THREE.DoubleSide });
+    const lampUnderside = new THREE.MeshStandardMaterial({ color: 0xb68a48, roughness: 0.7, metalness: 0.22, emissive: 0x5b3215, emissiveIntensity: 0.1, side: THREE.DoubleSide });
     const bulbMaterial = new THREE.MeshStandardMaterial({ color: 0xffe1ad, emissive: 0xffb968, emissiveIntensity: 2.2, roughness: 0.45 });
     for (const [index, [x, z, drop]] of [[0.58, 0.25, 0.55], [-0.2, -3.75, 0.72], [-0.65, -8.35, 0.64]].entries()) {
       const lamp = new THREE.Group();
       lamp.name = `station_lamp_${index}`;
       lamp.position.set(x, 3.1, z);
-      lamp.add(this.cylinderBetween(new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, -drop, 0), 0.012, conduitMaterial, 8));
-      const shade = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.13, 20, 1, true), lampMetal);
-      shade.position.y = -drop - 0.03;
-      shade.rotation.x = Math.PI;
-      const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.055, 14, 10), bulbMaterial.clone());
+      const cable = this.cylinderBetween(new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, -drop, 0), 0.011, conduitMaterial, 8);
+      const ceilingCup = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.068, 0.055, 18), lampMetal);
+      ceilingCup.position.y = -0.025;
+      const socket = new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.052, 0.12, 18), lampMetal);
+      socket.position.y = -drop - 0.035;
+      const shadeProfile = [
+        new THREE.Vector2(0.05, -0.02),
+        new THREE.Vector2(0.075, -0.055),
+        new THREE.Vector2(0.13, -0.105),
+        new THREE.Vector2(0.21, -0.145),
+        new THREE.Vector2(0.3, -0.17)
+      ];
+      const shade = new THREE.Mesh(new THREE.LatheGeometry(shadeProfile, 32), lampMetal);
+      shade.name = 'station_lamp_shade_visual';
+      shade.position.y = -drop;
+      const underside = new THREE.Mesh(new THREE.RingGeometry(0.064, 0.292, 32), lampUnderside);
+      underside.name = 'station_lamp_underside_visual';
+      underside.rotation.x = Math.PI / 2;
+      underside.position.y = -drop - 0.171;
+      const rim = new THREE.Mesh(new THREE.TorusGeometry(0.298, 0.011, 8, 32), lampMetal);
+      rim.rotation.x = Math.PI / 2;
+      rim.position.y = -drop - 0.171;
+      const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.068, 16, 12), bulbMaterial.clone());
       bulb.name = 'station_lamp_bulb_visual';
-      bulb.position.y = -drop - 0.1;
-      lamp.add(shade, bulb);
+      bulb.position.y = -drop - 0.205;
+      lamp.add(cable, ceilingCup, socket, shade, underside, rim, bulb);
       const glow = new THREE.PointLight(0xffc991, index === 0 ? 0.46 : 0.3, 4.4, 1.8);
       glow.name = 'station_lamp_light_visual';
-      glow.position.y = -drop - 0.12;
+      glow.position.y = -drop - 0.22;
       lamp.add(glow);
       hangingLamps.add(lamp);
     }

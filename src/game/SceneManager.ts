@@ -1161,16 +1161,16 @@ export class SceneManager {
     }
 
     if (this.currentDefinition.id === 'scene02_station') {
-      this.scene.background = new THREE.Color(0x4f5c68);
-      this.scene.fog = new THREE.FogExp2(0x697681, 0.013);
-      this.hemisphereLight.color.setHex(0xb8c5d5);
-      this.hemisphereLight.groundColor.setHex(0x555d5f);
-      this.hemisphereLight.intensity = 1.32;
-      this.keyLight.color.setHex(0xb7cae7);
-      this.keyLight.intensity = 1.48;
+      this.scene.background = new THREE.Color(0x545d61);
+      this.scene.fog = new THREE.FogExp2(0x68716f, 0.012);
+      this.hemisphereLight.color.setHex(0xc8c6ba);
+      this.hemisphereLight.groundColor.setHex(0x4e5856);
+      this.hemisphereLight.intensity = 1.24;
+      this.keyLight.color.setHex(0xc4ced0);
+      this.keyLight.intensity = 1.36;
       this.keyLight.position.set(-5.2, 3.2, 0.8);
-      this.dreamLight.color.setHex(0x7e91b6);
-      this.dreamLight.intensity = 0.22;
+      this.dreamLight.color.setHex(0x7e9298);
+      this.dreamLight.intensity = 0.18;
       this.dreamLight.distance = 13;
       this.dreamLight.position.set(2.2, 1.7, -1.5);
       return;
