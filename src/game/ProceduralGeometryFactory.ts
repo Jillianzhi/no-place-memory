@@ -115,6 +115,26 @@ export class ProceduralGeometryFactory {
     return panel;
   }
 
+  private structuralDecayPanel(
+    path: string,
+    width: number,
+    height: number,
+    opacity: number,
+    crop: TextureCrop,
+    renderOrder: number
+  ): THREE.Mesh {
+    const panel = this.assetDecorPanel(path, width, height, opacity, crop);
+    const material = panel.material as THREE.MeshBasicMaterial;
+    material.color.setHex(0x756f66);
+    material.side = THREE.DoubleSide;
+    material.blending = THREE.NormalBlending;
+    material.polygonOffset = true;
+    material.polygonOffsetFactor = -2;
+    material.polygonOffsetUnits = -2;
+    panel.renderOrder = renderOrder;
+    return panel;
+  }
+
   private softGlowPanel(width: number, height: number): THREE.Mesh {
     const texture = this.assetTexture('/assets/generated/shared_vfx/shared_vfx_glow_soft.png');
     return new THREE.Mesh(
@@ -1603,11 +1623,122 @@ export class ProceduralGeometryFactory {
 
     const beams = new THREE.Group();
     beams.name = 'station_ceiling_beams_visual';
+    const beamMaterial = ceilingMaterial.clone();
+    beamMaterial.map = this.assetTexture(ceilingPath);
+    beamMaterial.map.wrapS = THREE.RepeatWrapping;
+    beamMaterial.map.wrapT = THREE.RepeatWrapping;
+    beamMaterial.map.repeat.set(2, 0.24);
+    beamMaterial.bumpMap = beamMaterial.map;
     for (const z of [3.55, 0.65, -2.25, -5.15, -8.05, -10.95]) {
       const rearBeam = z < -2.3;
-      beams.add(this.box(rearBeam ? 4.25 : 6.6, 0.28, 0.34, ceilingMaterial, rearBeam ? -1.175 : 0, 2.96, z));
+      beams.add(this.box(rearBeam ? 4.25 : 6.6, 0.28, 0.34, beamMaterial, rearBeam ? -1.175 : 0, 2.96, z));
     }
     architecture.add(beams);
+
+    const structuralDecay = new THREE.Group();
+    structuralDecay.name = 'station_structural_decay_visual';
+    const ceilingDamagePath = '/assets/generated/scene02_v15/s02_ceiling_damage_atlas.png';
+    const beamDamagePath = '/assets/generated/scene02_v15/s02_beam_damage_atlas.png';
+    const columnDamagePath = '/assets/generated/scene02_v15/s02_column_damage_atlas.png';
+    const ceilingCrops: TextureCrop[] = [
+      { x: 0, y: 0, width: 341, height: 341, sourceWidth: 1024, sourceHeight: 683 },
+      { x: 341, y: 0, width: 342, height: 341, sourceWidth: 1024, sourceHeight: 683 },
+      { x: 683, y: 0, width: 341, height: 341, sourceWidth: 1024, sourceHeight: 683 },
+      { x: 0, y: 342, width: 341, height: 341, sourceWidth: 1024, sourceHeight: 683 },
+      { x: 341, y: 342, width: 342, height: 341, sourceWidth: 1024, sourceHeight: 683 },
+      { x: 683, y: 342, width: 341, height: 341, sourceWidth: 1024, sourceHeight: 683 }
+    ];
+    const beamCrops: TextureCrop[] = Array.from({ length: 6 }, (_, index) => ({
+      x: (index % 2) * 512,
+      y: Math.floor(index / 2) * 683 / 3,
+      width: 512,
+      height: 683 / 3,
+      sourceWidth: 1024,
+      sourceHeight: 683
+    }));
+    const columnCrops: TextureCrop[] = [
+      { x: 0, y: 0, width: 227, height: 512, sourceWidth: 683, sourceHeight: 1024 },
+      { x: 228, y: 0, width: 227, height: 512, sourceWidth: 683, sourceHeight: 1024 },
+      { x: 456, y: 0, width: 227, height: 512, sourceWidth: 683, sourceHeight: 1024 },
+      { x: 0, y: 512, width: 227, height: 512, sourceWidth: 683, sourceHeight: 1024 },
+      { x: 228, y: 512, width: 227, height: 512, sourceWidth: 683, sourceHeight: 1024 },
+      { x: 456, y: 512, width: 227, height: 512, sourceWidth: 683, sourceHeight: 1024 }
+    ];
+
+    const ceilingMarks = [
+      { crop: 5, x: 0.58, z: 0.25, width: 1.34, depth: 1.05, opacity: 0.62, rotation: -0.08 },
+      { crop: 1, x: -1.9, z: 2.48, width: 1.72, depth: 0.95, opacity: 0.5, rotation: 0.2 },
+      { crop: 3, x: 2.18, z: 1.75, width: 1.45, depth: 1.1, opacity: 0.5, rotation: -0.15 },
+      { crop: 2, x: -0.8, z: -1.58, width: 1.55, depth: 0.9, opacity: 0.58, rotation: 0.09 },
+      { crop: 4, x: -1.65, z: -3.72, width: 1.38, depth: 1.02, opacity: 0.48, rotation: -0.17 },
+      { crop: 0, x: -2.35, z: -6.72, width: 1.62, depth: 1.22, opacity: 0.5, rotation: 0.12 },
+      { crop: 1, x: -0.45, z: -8.72, width: 1.5, depth: 0.82, opacity: 0.46, rotation: -0.1 },
+      { crop: 3, x: -2.15, z: -10.82, width: 1.72, depth: 1.2, opacity: 0.54, rotation: 0.18 }
+    ];
+    ceilingMarks.forEach((config, index) => {
+      const mark = this.structuralDecayPanel(
+        ceilingDamagePath,
+        config.width,
+        config.depth,
+        config.opacity,
+        ceilingCrops[config.crop],
+        18 + index
+      );
+      mark.name = `station_ceiling_decay_${index + 1}_visual`;
+      mark.rotation.set(Math.PI / 2, 0, config.rotation);
+      mark.position.set(config.x, 3.112, config.z);
+      structuralDecay.add(mark);
+    });
+
+    const beamMarks = [
+      { crop: 0, x: -1.65, z: 3.55, width: 1.48, height: 0.27, y: 2.96, opacity: 0.58 },
+      { crop: 1, x: 1.18, z: 0.65, width: 1.72, height: 0.28, y: 2.96, opacity: 0.62 },
+      { crop: 2, x: -1.12, z: -2.25, width: 1.54, height: 0.27, y: 2.96, opacity: 0.62 },
+      { crop: 3, x: -1.8, z: -5.15, width: 1.34, height: 0.27, y: 2.96, opacity: 0.68 },
+      { crop: 4, x: -0.72, z: -8.05, width: 1.5, height: 0.27, y: 2.96, opacity: 0.58 },
+      { crop: 2, x: -1.6, z: -10.95, width: 1.64, height: 0.28, y: 2.96, opacity: 0.64 }
+    ];
+    beamMarks.forEach((config, index) => {
+      const mark = this.structuralDecayPanel(
+        beamDamagePath,
+        config.width,
+        config.height,
+        config.opacity,
+        beamCrops[config.crop],
+        30 + index
+      );
+      mark.name = `station_beam_decay_${index + 1}_visual`;
+      mark.position.set(config.x, config.y, config.z + 0.176);
+      structuralDecay.add(mark);
+    });
+
+    const columnMarks = [
+      { side: 'left', crop: 0, z: 3.35, y: 0.62, width: 0.4, height: 1.12, opacity: 0.58 },
+      { side: 'left', crop: 3, z: 0.35, y: 1.62, width: 0.4, height: 1.22, opacity: 0.64 },
+      { side: 'left', crop: 2, z: -2.65, y: 1.72, width: 0.4, height: 1.26, opacity: 0.57 },
+      { side: 'left', crop: 4, z: -5.65, y: 1.34, width: 0.4, height: 1.3, opacity: 0.5 },
+      { side: 'left', crop: 0, z: -8.65, y: 0.62, width: 0.4, height: 1.12, opacity: 0.62 },
+      { side: 'left', crop: 5, z: -11.65, y: 1.68, width: 0.4, height: 1.36, opacity: 0.62 },
+      { side: 'right', crop: 1, z: 3.35, y: 1.48, width: 0.4, height: 1.2, opacity: 0.54 },
+      { side: 'right', crop: 3, z: 0.35, y: 1.7, width: 0.4, height: 1.28, opacity: 0.6 }
+    ] as const;
+    columnMarks.forEach((config, index) => {
+      const mark = this.structuralDecayPanel(
+        columnDamagePath,
+        config.width,
+        config.height,
+        config.opacity,
+        columnCrops[config.crop],
+        38 + index
+      );
+      mark.name = `station_column_decay_${index + 1}_visual`;
+      const left = config.side === 'left';
+      mark.rotation.y = left ? Math.PI / 2 : -Math.PI / 2;
+      mark.position.set(left ? -2.894 : 2.894, config.y, config.z);
+      structuralDecay.add(mark);
+    });
+
+    architecture.add(structuralDecay);
 
     const farWall = new THREE.Group();
     farWall.name = 'station_far_wall_visual';
