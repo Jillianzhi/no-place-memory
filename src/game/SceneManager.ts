@@ -328,7 +328,7 @@ export class SceneManager {
       if (reflectionMaterial?.map) {
         reflectionMaterial.map.offset.x = Math.sin(time * 0.00009) * 0.018;
         reflectionMaterial.map.offset.y = (time * 0.000006) % 1;
-        reflectionMaterial.opacity = 0.15 + Math.sin(time * 0.0003) * 0.028;
+        reflectionMaterial.opacity = 0.065 + Math.sin(time * 0.0003) * 0.012;
       }
 
       const fans = this.findVisual('station_ceiling_fans_visual');
@@ -1161,16 +1161,16 @@ export class SceneManager {
     }
 
     if (this.currentDefinition.id === 'scene02_station') {
-      this.scene.background = new THREE.Color(0x545d61);
-      this.scene.fog = new THREE.FogExp2(0x68716f, 0.012);
-      this.hemisphereLight.color.setHex(0xc8c6ba);
-      this.hemisphereLight.groundColor.setHex(0x4e5856);
-      this.hemisphereLight.intensity = 1.24;
-      this.keyLight.color.setHex(0xc4ced0);
-      this.keyLight.intensity = 1.36;
+      this.scene.background = new THREE.Color(0x93948a);
+      this.scene.fog = new THREE.FogExp2(0xa49c87, 0.009);
+      this.hemisphereLight.color.setHex(0xf0eee5);
+      this.hemisphereLight.groundColor.setHex(0xb2ac9d);
+      this.hemisphereLight.intensity = 1.65;
+      this.keyLight.color.setHex(0xf5f1e7);
+      this.keyLight.intensity = 1.8;
       this.keyLight.position.set(-5.2, 3.2, 0.8);
-      this.dreamLight.color.setHex(0x7e9298);
-      this.dreamLight.intensity = 0.18;
+      this.dreamLight.color.setHex(0xd5ccb3);
+      this.dreamLight.intensity = 0.22;
       this.dreamLight.distance = 13;
       this.dreamLight.position.set(2.2, 1.7, -1.5);
       return;

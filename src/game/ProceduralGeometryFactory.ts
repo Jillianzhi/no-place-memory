@@ -115,6 +115,22 @@ export class ProceduralGeometryFactory {
     return panel;
   }
 
+  private stationSurfacePalette(material: THREE.MeshStandardMaterial | THREE.MeshBasicMaterial, color: number, shadowLift: number): void {
+    material.color.setHex(color);
+    // Keep scanned wear and alpha while replacing the original cool pigment.
+    material.onBeforeCompile = (shader) => {
+      shader.uniforms.stationShadowLift = { value: shadowLift };
+      shader.fragmentShader = `uniform float stationShadowLift;\n${shader.fragmentShader}`;
+      shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', THREE.ShaderChunk.map_fragment.replace(
+        'diffuseColor *= sampledDiffuseColor;',
+        `float wear = sqrt(max(dot(sampledDiffuseColor.rgb, vec3(0.2126, 0.7152, 0.0722)), 0.0));
+        sampledDiffuseColor.rgb = vec3(mix(stationShadowLift, 1.0, wear));
+        diffuseColor *= sampledDiffuseColor;`
+      ));
+    };
+    material.customProgramCacheKey = () => 'station-surface-palette-v1';
+  }
+
   private structuralDecayPanel(
     path: string,
     width: number,
@@ -1514,23 +1530,23 @@ export class ProceduralGeometryFactory {
     const lowerWallPath = '/assets/generated/scene02_v14/s02_lower_wall_chipped_teal.jpg';
     const ceilingPath = '/assets/generated/scene02_v14/s02_ceiling_water_stains.jpg';
     const upperWall = this.mappedMaterial(upperWallPath, 1.45, 2.1, 0.99);
-    upperWall.color.setHex(0xd0cbc1);
+    this.stationSurfacePalette(upperWall, 0xded9cc, 0.3);
     upperWall.emissive.setHex(0x45423d);
     upperWall.emissiveIntensity = 0.11;
     upperWall.bumpMap = upperWall.map;
     upperWall.bumpScale = 0.022;
-    const lowerWall = this.mappedMaterial(lowerWallPath, 1.55, 2.25, 0.99);
-    lowerWall.color.setHex(0xc0c9c4);
-    lowerWall.emissive.setHex(0x2d3b38);
+    const lowerWall = this.mappedMaterial(lowerWallPath, 1.55, 2.25, 0.88);
+    this.stationSurfacePalette(lowerWall, 0x79423b, 0.24);
+    lowerWall.emissive.setHex(0x38221d);
     lowerWall.emissiveIntensity = 0.1;
     lowerWall.bumpMap = lowerWall.map;
     lowerWall.bumpScale = 0.019;
-    const floorMaterial = this.mappedMaterial('/assets/generated/scene02_v4/s02_floor_wet_terrazzo_basecolor.jpg', 2.4, 12, 0.5);
-    floorMaterial.color.setHex(0xb1aaa0);
-    floorMaterial.emissive.setHex(0x414747);
-    floorMaterial.emissiveIntensity = 0.16;
+    const floorMaterial = this.mappedMaterial('/assets/generated/scene02_v4/s02_floor_wet_terrazzo_basecolor.jpg', 2.4, 12, 0.86);
+    this.stationSurfacePalette(floorMaterial, 0xaaa69b, 0.14);
+    floorMaterial.emissive.setHex(0x302b22);
+    floorMaterial.emissiveIntensity = 0.08;
     const ceilingMaterial = this.mappedMaterial(ceilingPath, 2.0, 7.2, 0.99);
-    ceilingMaterial.color.setHex(0xc4beb4);
+    this.stationSurfacePalette(ceilingMaterial, 0xe1ddd0, 0.34);
     ceilingMaterial.emissive.setHex(0x44413b);
     ceilingMaterial.emissiveIntensity = 0.115;
     ceilingMaterial.bumpMap = ceilingMaterial.map;
@@ -1624,6 +1640,7 @@ export class ProceduralGeometryFactory {
     const beams = new THREE.Group();
     beams.name = 'station_ceiling_beams_visual';
     const beamMaterial = ceilingMaterial.clone();
+    this.stationSurfacePalette(beamMaterial, 0xe1ddd0, 0.34);
     beamMaterial.map = this.assetTexture(ceilingPath);
     beamMaterial.map.wrapS = THREE.RepeatWrapping;
     beamMaterial.map.wrapT = THREE.RepeatWrapping;
@@ -1842,9 +1859,9 @@ export class ProceduralGeometryFactory {
       new THREE.PlaneGeometry(6.28, 21),
       new THREE.MeshBasicMaterial({
         map: reflectionTexture,
-        color: 0x9fb1bd,
+        color: 0xc9c0a7,
         transparent: true,
-        opacity: 0.17,
+        opacity: 0.065,
         blending: THREE.AdditiveBlending,
         depthWrite: false
       })
@@ -1920,8 +1937,8 @@ export class ProceduralGeometryFactory {
 
     const benches = new THREE.Group();
     benches.name = 'station_benches_visual';
-    const benchFrameMaterial = new THREE.MeshStandardMaterial({ color: 0x445356, roughness: 0.54, metalness: 0.62 });
-    const benchSeatMaterial = new THREE.MeshStandardMaterial({ color: 0x527174, roughness: 0.82, metalness: 0.08 });
+    const benchFrameMaterial = new THREE.MeshStandardMaterial({ color: 0x514b40, roughness: 0.7, metalness: 0.42 });
+    const benchSeatMaterial = new THREE.MeshStandardMaterial({ color: 0x71352f, roughness: 0.82, metalness: 0.08 });
     for (const [index, [x, y, z, width, height]] of [
       [-1.72, 0.42, 1.25, 1.82, 0.83],
       [-1.74, 0.38, -1.45, 1.62, 0.74],
@@ -1933,7 +1950,7 @@ export class ProceduralGeometryFactory {
       const benchImage = this.assetDecorPanel('/assets/generated/scene02_v4/s02_prop_waiting_bench_front.webp', width, height, 0.98);
       benchImage.name = `station_bench_row_${index + 1}_image_visual`;
       benchImage.position.z = 0.16;
-      (benchImage.material as THREE.MeshBasicMaterial).color.setHex(0x789396);
+      this.stationSurfacePalette(benchImage.material as THREE.MeshBasicMaterial, 0x87463d, 0.14);
       const seat = this.box(width * 0.92, 0.07, 0.42, benchSeatMaterial, 0, -height * 0.08, 0.02);
       const rearBeam = this.box(width * 0.9, 0.07, 0.08, benchFrameMaterial, 0, height * 0.18, -0.08);
       const lowerBeam = this.box(width * 0.82, 0.045, 0.07, benchFrameMaterial, 0, -height * 0.36, -0.04);
