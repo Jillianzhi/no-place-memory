@@ -9,6 +9,7 @@ import { InteractionSystem, type InteractionFeedback } from './InteractionSystem
 import { ParticleSystem } from './ParticleSystem';
 import { SceneManager } from './SceneManager';
 import { SceneEditor } from './SceneEditor';
+import { openArchiveShare } from './ArchiveShare';
 
 interface ArchiveProfile {
   code: string;
@@ -335,12 +336,32 @@ export class Game {
 
         <footer class="archive-footer">
           <div class="archive-seal"><span>已封存</span><small>NO PLACE ARCHIVE</small></div>
-          <button class="primary-button" aria-label="重新体验">重新体验</button>
+          <div class="archive-actions">
+            <button class="primary-button" data-share>保存分享图片</button>
+            <button class="primary-button" data-restart aria-label="重新体验">重新体验</button>
+          </div>
         </footer>
+        <p class="archive-share-hint">把你的身份卡分享给身边的小伙伴 · 图片内附游戏二维码</p>
       </div>
     `;
     this.container.append(panel);
-    panel.querySelector('button')?.addEventListener('click', () => {
+    panel.querySelector<HTMLButtonElement>('[data-share]')?.addEventListener('click', (event) => {
+      void openArchiveShare(panel, event.currentTarget as HTMLButtonElement, {
+        number: archiveNumber, result, mark: profile.mark, summary: profile.summary, tags: profile.tags,
+        metrics: [
+          [`${data.dragSuccesses}/${data.dragAttempts}`, '拖拽归位'],
+          [data.observeAttempts ? `${observeRate}%` : '—', '观察校验'],
+          [String(data.hiddenFound), '隐藏发现'], [String(data.errorCount), '无效触碰']
+        ],
+        routes: archiveSceneOrder.map(([title, place]) => ({
+          place, time: this.formatArchiveTime(data.sceneTimes[title] ?? 0),
+          fraction: (data.sceneTimes[title] ?? 0) / maxSceneSeconds
+        })),
+        totalTime: this.formatArchiveTime(totalSeconds),
+        note: `你最先触碰了“${firstTouched}”，并在“${longestPlace}”停留最久。记录不会判断你是否走对，只保存你如何辨认一处不属于任何人的空间。`
+      });
+    });
+    panel.querySelector('[data-restart]')?.addEventListener('click', () => {
       this.audio.playSfx('dossier_close');
       panel.remove();
       this.sceneManager.restart();
