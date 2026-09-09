@@ -195,8 +195,10 @@ export class Game {
   };
 
   start(): void {
-    const sceneParam = Number(new URLSearchParams(location.search).get('scene') ?? '1');
-    const initialScene = Number.isFinite(sceneParam) ? Math.min(5, Math.max(1, sceneParam)) - 1 : 0;
+    const sceneValue = new URLSearchParams(location.search).get('scene');
+    const sceneParam = Number(sceneValue ?? '1');
+    const requestedScene = Number.isFinite(sceneParam) ? Math.min(5, Math.max(1, sceneParam)) - 1 : 0;
+    const initialScene = sceneValue === null ? this.sceneManager.currentSceneIndex : requestedScene;
     this.cameraRig.setScene(initialScene);
     void this.sceneManager.load(initialScene).then(() => {
       this.archive.enterScene(this.sceneManager.currentDefinition.title);
@@ -207,6 +209,7 @@ export class Game {
   }
 
   private showStart(): void {
+    const hasSavedProgress = this.sceneManager.hasSavedProgress();
     document.documentElement.classList.add('intro-active');
     const start = document.createElement('div');
     start.className = 'start-card';
@@ -224,8 +227,8 @@ export class Game {
       <div class="start-content">
         <div class="start-index">一份尚未归档的空间记录</div>
         <h1><span>不在此处，</span><span>不在别处</span></h1>
-        <p>五个无人空间，正在等待一次轻轻触碰。</p>
-        <button class="primary-button start-button" aria-label="开始游戏">开始游戏</button>
+        <p>${hasSavedProgress ? '已找回上次离开时的空间记录。' : '五个无人空间，正在等待一次轻轻触碰。'}</p>
+        <button class="primary-button start-button" aria-label="${hasSavedProgress ? '继续游戏' : '开始游戏'}">${hasSavedProgress ? '继续游戏' : '开始游戏'}</button>
       </div>
       <div class="start-footnote">建议佩戴耳机 · 声音将在进入后开启</div>
     `;

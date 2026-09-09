@@ -1,30 +1,37 @@
 import type { ArchiveData } from './types';
 
+const createEmptyArchive = (): ArchiveData => ({
+  firstTouchedObject: null,
+  longestScene: null,
+  sceneTimes: {},
+  errorCount: 0,
+  repeatedTouches: {},
+  hiddenFound: 0,
+  dragAttempts: 0,
+  dragSuccesses: 0,
+  observeAttempts: 0,
+  observeSuccesses: 0,
+  resultType: null
+});
+
 export class ArchiveSystem {
-  readonly data: ArchiveData = {
-    firstTouchedObject: null,
-    longestScene: null,
-    sceneTimes: {},
-    errorCount: 0,
-    repeatedTouches: {},
-    hiddenFound: 0,
-    dragAttempts: 0,
-    dragSuccesses: 0,
-    observeAttempts: 0,
-    observeSuccesses: 0,
-    resultType: null
-  };
+  private static readonly STORAGE_KEY = 'no-place-archive';
+  readonly data: ArchiveData = createEmptyArchive();
 
   private sceneEnterAt = performance.now();
   private activeScene = '';
   private readonly discoveries = new Set<string>();
 
+  constructor() {
+    this.restore();
+  }
+
   reset(): void {
-    Object.assign(this.data, new ArchiveSystem().data);
+    Object.assign(this.data, createEmptyArchive());
     this.discoveries.clear();
     this.activeScene = '';
     this.sceneEnterAt = performance.now();
-    localStorage.removeItem('no-place-archive');
+    localStorage.removeItem(ArchiveSystem.STORAGE_KEY);
   }
 
   enterScene(scene: string): void {
@@ -40,30 +47,36 @@ export class ArchiveSystem {
     const entries = Object.entries(this.data.sceneTimes).sort((a, b) => b[1] - a[1]);
     this.data.longestScene = entries[0]?.[0] ?? null;
     this.activeScene = '';
+    this.persist();
   }
 
   touch(id: string): void {
     if (!this.data.firstTouchedObject) this.data.firstTouchedObject = id;
     this.data.repeatedTouches[id] = (this.data.repeatedTouches[id] ?? 0) + 1;
+    this.persist();
   }
 
   error(): void {
     this.data.errorCount += 1;
+    this.persist();
   }
 
   hidden(id: string): void {
     this.discoveries.add(id);
     this.data.hiddenFound = this.discoveries.size;
+    this.persist();
   }
 
   drag(success: boolean): void {
     this.data.dragAttempts += 1;
     if (success) this.data.dragSuccesses += 1;
+    this.persist();
   }
 
   observe(success: boolean): void {
     this.data.observeAttempts += 1;
     if (success) this.data.observeSuccesses += 1;
+    this.persist();
   }
 
   finalize(): ArchiveData {
@@ -81,7 +94,32 @@ export class ArchiveSystem {
     } else {
       this.data.resultType = '没有归档的人';
     }
-    localStorage.setItem('no-place-archive', JSON.stringify(this.data));
+    this.persist();
     return this.data;
+  }
+
+  private restore(): void {
+    try {
+      const raw = localStorage.getItem(ArchiveSystem.STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as { data?: Partial<ArchiveData>; discoveries?: string[] } | Partial<ArchiveData>;
+      const savedData = 'data' in parsed && parsed.data ? parsed.data : parsed;
+      Object.assign(this.data, savedData);
+      const discoveries = 'discoveries' in parsed && Array.isArray(parsed.discoveries) ? parsed.discoveries : [];
+      discoveries.forEach((id) => this.discoveries.add(id));
+    } catch {
+      localStorage.removeItem(ArchiveSystem.STORAGE_KEY);
+    }
+  }
+
+  private persist(): void {
+    try {
+      localStorage.setItem(ArchiveSystem.STORAGE_KEY, JSON.stringify({
+        data: this.data,
+        discoveries: [...this.discoveries]
+      }));
+    } catch {
+      // Private browsing or full storage must never stop the game.
+    }
   }
 }

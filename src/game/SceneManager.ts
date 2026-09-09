@@ -169,6 +169,7 @@ export const sceneDefinitions: SceneDefinition[] = [
 ];
 
 export class SceneManager {
+  private static readonly PROGRESS_KEY = 'no-place-progress-v1';
   readonly scene = new THREE.Scene();
   readonly materials = new DreamMaterials();
   readonly textures = new CanvasTextureFactory();
@@ -374,6 +375,7 @@ export class SceneManager {
     for (const definition of sceneDefinitions) {
       this.states.set(definition.id, { flags: {}, completed: false });
     }
+    this.restoreProgress();
   }
 
   get currentDefinition(): SceneDefinition {
@@ -394,6 +396,10 @@ export class SceneManager {
 
   get currentSceneIndex(): number {
     return this.currentIndex;
+  }
+
+  hasSavedProgress(): boolean {
+    return this.currentIndex > 0 || [...this.states.values()].some((state) => Object.keys(state.flags).length > 0);
   }
 
   get layoutOrientation(): 'portrait' | 'landscape' {
@@ -596,6 +602,7 @@ export class SceneManager {
       const nextIndex = this.currentIndex + 1;
       this.onMessage(`正在进入“${sceneDefinitions[nextIndex].title}”…`);
       await this.load(nextIndex);
+      this.persistProgress();
       this.onComplete('scene');
     } else {
       this.onComplete('game');
@@ -607,6 +614,8 @@ export class SceneManager {
       state.flags = {};
       state.completed = false;
     }
+    this.currentIndex = 0;
+    localStorage.removeItem(SceneManager.PROGRESS_KEY);
     void this.load(0);
   }
 
@@ -635,7 +644,44 @@ export class SceneManager {
     }
 
     this.updateCompletion();
+    this.persistProgress();
     return success;
+  }
+
+  private restoreProgress(): void {
+    try {
+      const raw = localStorage.getItem(SceneManager.PROGRESS_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as {
+        version?: number;
+        currentIndex?: number;
+        states?: Record<string, SceneState>;
+      };
+      if (parsed.version !== 1 || !parsed.states) return;
+      this.currentIndex = Math.min(sceneDefinitions.length - 1, Math.max(0, Number(parsed.currentIndex) || 0));
+      for (const definition of sceneDefinitions) {
+        const saved = parsed.states[definition.id];
+        if (!saved || typeof saved.flags !== 'object') continue;
+        this.states.set(definition.id, {
+          flags: { ...saved.flags },
+          completed: Boolean(saved.completed)
+        });
+      }
+    } catch {
+      localStorage.removeItem(SceneManager.PROGRESS_KEY);
+    }
+  }
+
+  private persistProgress(): void {
+    try {
+      localStorage.setItem(SceneManager.PROGRESS_KEY, JSON.stringify({
+        version: 1,
+        currentIndex: this.currentIndex,
+        states: Object.fromEntries(this.states)
+      }));
+    } catch {
+      // Progress recovery is optional when browser storage is unavailable.
+    }
   }
 
   beginDrag(id: HotspotId, worldPoint: THREE.Vector3): void {
