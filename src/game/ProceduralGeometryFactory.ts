@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { CanvasTextureFactory } from './CanvasTextureFactory';
 import { ChineseDreamcoreKit } from './ChineseDreamcoreKit';
 import { DreamMaterials } from './DreamMaterials';
+import { getMemoryPhotoIdentity, memoryPhotos } from './MemoryPhotoCatalog';
 import type { SceneBuildResult, SceneDefinition } from './types';
 
 interface TextureCrop {
@@ -12,45 +13,6 @@ interface TextureCrop {
   sourceWidth?: number;
   sourceHeight?: number;
 }
-
-const memoryPhotos = [
-  { file: '01_幼儿园午休.jpg', width: 1200, height: 673 },
-  { file: '02_厂区游乐场.jpg', width: 1200, height: 673 },
-  { file: '03_照相馆合影.jpg', width: 1200, height: 802 },
-  { file: '04_文化宫马戏.jpg', width: 1200, height: 675 },
-  { file: '05_大院喷水池.jpg', width: 1200, height: 900 },
-  { file: '06_旧教学楼旁.jpg', width: 1200, height: 1198 },
-  { file: '07_乡镇大集市.jpg', width: 1200, height: 956 },
-  { file: '08_车站蹦蹦床.jpg', width: 1194, height: 1200 },
-  { file: '09_街边连廊道.jpg', width: 976, height: 1200 },
-  { file: '10_老动物园笼.jpg', width: 1200, height: 833 },
-  { file: '11_筒子楼过道.jpg', width: 926, height: 1200 },
-  { file: '12_副食游乐屋.jpg', width: 1200, height: 1152 },
-  { file: '13_公园旋转马.jpg', width: 868, height: 1200 },
-  { file: '14_老式会客厅.jpg', width: 1177, height: 1200 },
-  { file: '15_旧楼楼梯间.jpg', width: 1200, height: 845 },
-  { file: '16_生日公告栏.jpg', width: 1200, height: 866 },
-  { file: '17_校园走廊道.jpg', width: 1200, height: 832 },
-  { file: '18_公园摇摇车.jpg', width: 968, height: 1200 },
-  { file: '19_旧时滑滑梯.jpg', width: 1200, height: 1200 },
-  { file: '20_童年小恐龙.jpg', width: 1200, height: 801 },
-  { file: '21_闲置游乐场.jpg', width: 1200, height: 881 },
-  { file: '22_旧时彩虹轨.jpg', width: 1200, height: 828 },
-  { file: '23_澡堂游乐区.jpg', width: 1200, height: 786 },
-  { file: '24_公园旋转椅.jpg', width: 1200, height: 850 },
-  { file: '25_花园连廊道.jpg', width: 1200, height: 887 },
-  { file: '26_老式小卖铺.jpg', width: 1200, height: 786 },
-  { file: '27_学校的门口.jpg', width: 834, height: 1200 },
-  { file: '28_小小报刊亭.jpg', width: 1200, height: 1001 },
-  { file: '29_校园长走廊.jpg', width: 1200, height: 876 },
-  { file: '30_桥洞石板路.jpg', width: 796, height: 1200 },
-  { file: '31_废弃游乐屋.jpg', width: 789, height: 1200 },
-  { file: '32_家门口乐园.jpg', width: 898, height: 1200 },
-  { file: '33_杂货集市摊.jpg', width: 904, height: 1200 },
-  { file: '34_飞椅游乐园.jpg', width: 1200, height: 891 },
-  { file: '35_学校运动场.jpg', width: 1200, height: 848 },
-  { file: '36_旧玩具商铺.jpg', width: 944, height: 1200 }
-] as const;
 
 export class ProceduralGeometryFactory {
   private readonly textureLoader = new THREE.TextureLoader();
@@ -3551,6 +3513,7 @@ export class ProceduralGeometryFactory {
     const frameBase = new THREE.MeshStandardMaterial({ color: 0x211e1b, roughness: 0.76, metalness: 0.08 });
 
     memoryPhotos.forEach((photo, index) => {
+      const identity = getMemoryPhotoIdentity(index);
       const section = sections[Math.floor(index / 12)];
       const side = index % 2 === 0 ? -1 : 1;
       const slot = Math.floor(index / 2);
@@ -3562,14 +3525,14 @@ export class ProceduralGeometryFactory {
       const frameWidth = photoWidth + 0.105;
       const frameHeight = photoHeight + 0.105;
       const photoGroup = new THREE.Group();
-      photoGroup.name = `memory_photo_${String(index + 1).padStart(2, '0')}_visual`;
+      photoGroup.name = identity.visualName;
       photoGroup.position.set(side * 2.205, y, z);
       photoGroup.rotation.y = side < 0 ? Math.PI / 2 - 0.15 : -Math.PI / 2 + 0.15;
       photoGroup.rotation.z = ((index % 5) - 2) * 0.012;
 
       const frame = this.box(frameWidth, frameHeight, 0.06, frameBase.clone(), 0, 0, 0);
       const matBoard = this.box(photoWidth + 0.035, photoHeight + 0.035, 0.025, matBoardBase.clone(), 0, 0, 0.042);
-      const texture = this.assetTexture(`/assets/dreamcore/photos/${String(index + 1).padStart(2, '0')}.jpg`);
+      const texture = this.assetTexture(identity.assetPath);
       const print = new THREE.Mesh(
         new THREE.PlaneGeometry(photoWidth, photoHeight),
         new THREE.MeshBasicMaterial({ map: texture, color: 0xffffff, toneMapped: false, side: THREE.DoubleSide })
@@ -3586,32 +3549,16 @@ export class ProceduralGeometryFactory {
       photoGroup.add(frame, matBoard, print, glass);
       section.add(photoGroup);
 
-      const photoHotspot = this.kit.createHotspotShell('hotspot_memory_photo', new THREE.Vector3(frameWidth + 0.12, frameHeight + 0.12, 0.2));
+      const photoHotspot = this.kit.createHotspotShell('hotspot_memory_photo', new THREE.Vector3(frameWidth + 0.18, frameHeight + 0.18, 0.2));
       photoHotspot.position.copy(photoGroup.position);
       photoHotspot.rotation.copy(photoGroup.rotation);
-      photoHotspot.userData.visualName = photoGroup.name;
-      photoHotspot.userData.photoTitle = photo.file.replace(/^\d+_/, '').replace(/\.jpg$/, '');
+      photoHotspot.userData.visualName = identity.visualName;
+      photoHotspot.userData.photoTitle = identity.title;
       photoHotspot.userData.photoAspect = aspect;
       photoHotspot.userData.memorySection = Math.floor(index / 12);
       root.add(photoHotspot);
       hotspots.push(photoHotspot);
     });
-
-    const sectionProxies = [
-      { position: new THREE.Vector3(-1.78, 1.62, -2.1), visual: 'memory_photo_01_visual', title: '幼儿园午休', aspect: 1200 / 673, section: 0 },
-      { position: new THREE.Vector3(1.62, 1.62, -7.15), visual: 'memory_photo_13_visual', title: '公园旋转马', aspect: 868 / 1200, section: 1 },
-      { position: new THREE.Vector3(-1.25, 1.62, -11.9), visual: 'memory_photo_25_visual', title: '花园连廊道', aspect: 1200 / 887, section: 2 }
-    ];
-    for (const proxy of sectionProxies) {
-      const sectionProxy = this.kit.createHotspotShell('hotspot_memory_photo', new THREE.Vector3(0.95, 2.25, 3.8));
-      sectionProxy.position.copy(proxy.position);
-      sectionProxy.userData.visualName = proxy.visual;
-      sectionProxy.userData.photoTitle = proxy.title;
-      sectionProxy.userData.photoAspect = proxy.aspect;
-      sectionProxy.userData.memorySection = proxy.section;
-      root.add(sectionProxy);
-      hotspots.push(sectionProxy);
-    }
 
     const focus = new THREE.Group();
     focus.name = 'memory_focus_visual';
