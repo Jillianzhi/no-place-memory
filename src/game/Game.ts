@@ -337,7 +337,7 @@ export class Game {
         <footer class="archive-footer">
           <div class="archive-seal"><span>已封存</span><small>NO PLACE ARCHIVE</small></div>
           <div class="archive-actions">
-            <button class="primary-button" data-share>长按保存图片</button>
+            <button class="primary-button" data-share>保存图片</button>
             <button class="primary-button" data-restart aria-label="重新体验">重新体验</button>
           </div>
         </footer>
@@ -374,7 +374,7 @@ export class Game {
       paper.classList.add('archive-paper-image');
       paper.replaceChildren(image, footer);
     }).catch(() => {
-      hint.textContent = '图片未能生成，请点击“长按保存图片”重试，打开图片后长按保存。';
+      hint.textContent = '图片未能生成，请点击“保存图片”重试，打开图片后长按保存。';
     });
     panel.querySelector<HTMLButtonElement>('[data-share]')?.addEventListener('click', (event) => {
       void openArchiveShare(panel, event.currentTarget as HTMLButtonElement, shareData);
