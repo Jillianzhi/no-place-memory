@@ -292,6 +292,25 @@ export class InteractionSystem {
   }
 
   private pick(point: THREE.Vector2): PickResult | null {
+    const directHit = this.raycastAt(point);
+    if (directHit) return directHit;
+
+    // Fingers cover more screen area than a mouse cursor. Sample a small ring
+    // around the touch point so thin props and distant photos remain tappable.
+    const radius = window.matchMedia('(pointer: coarse)').matches ? 22 : 10;
+    const offsets = [
+      [-radius, 0], [radius, 0], [0, -radius], [0, radius],
+      [-radius * 0.7, -radius * 0.7], [radius * 0.7, -radius * 0.7],
+      [-radius * 0.7, radius * 0.7], [radius * 0.7, radius * 0.7]
+    ];
+    for (const [offsetX, offsetY] of offsets) {
+      const nearbyHit = this.raycastAt(new THREE.Vector2(point.x + offsetX, point.y + offsetY));
+      if (nearbyHit) return nearbyHit;
+    }
+    return null;
+  }
+
+  private raycastAt(point: THREE.Vector2): PickResult | null {
     const rect = (this.input as unknown as { element?: HTMLElement }).element?.getBoundingClientRect?.() ?? document.body.getBoundingClientRect();
     this.ndc.x = ((point.x - rect.left) / rect.width) * 2 - 1;
     this.ndc.y = -(((point.y - rect.top) / rect.height) * 2 - 1);
@@ -371,8 +390,8 @@ export class InteractionSystem {
       const canvasRect = (this.input as unknown as { element?: HTMLElement }).element?.getBoundingClientRect?.() ?? document.body.getBoundingClientRect();
       const doorRect = this.projectBounds(door, canvasRect);
       if (!doorRect) return null;
-      const pointerInside = point.x >= doorRect.left - 10 && point.x <= doorRect.right + 10
-        && point.y >= doorRect.top - 10 && point.y <= doorRect.bottom + 10;
+      const pointerInside = point.x >= doorRect.left - 24 && point.x <= doorRect.right + 24
+        && point.y >= doorRect.top - 24 && point.y <= doorRect.bottom + 24;
       return pointerInside ? door : null;
     }
     if (draggedId !== 'hotspot_ticket') return null;
@@ -387,17 +406,17 @@ export class InteractionSystem {
     if (!ticketRect || !slotRect) return null;
 
     const target = {
-      left: slotRect.left - 12,
-      top: slotRect.top - 14,
-      right: slotRect.right + 12,
-      bottom: slotRect.bottom + 14
+      left: slotRect.left - 30,
+      top: slotRect.top - 32,
+      right: slotRect.right + 30,
+      bottom: slotRect.bottom + 32
     };
     const overlapWidth = Math.max(0, Math.min(ticketRect.right, target.right) - Math.max(ticketRect.left, target.left));
     const overlapHeight = Math.max(0, Math.min(ticketRect.bottom, target.bottom) - Math.max(ticketRect.top, target.top));
     const ticketArea = Math.max(1, (ticketRect.right - ticketRect.left) * (ticketRect.bottom - ticketRect.top));
     const overlapRatio = overlapWidth * overlapHeight / ticketArea;
     const pointerInside = point.x >= target.left && point.x <= target.right && point.y >= target.top && point.y <= target.bottom;
-    return pointerInside && overlapRatio >= 0.15 ? gate : null;
+    return pointerInside && overlapRatio >= 0.05 ? gate : null;
   }
 
   private projectBounds(object: THREE.Object3D, canvasRect: DOMRect): ScreenRect | null {

@@ -981,7 +981,7 @@ export class SceneManager {
     this.pulseVisual('memory_focus_visual', 1.055);
     window.setTimeout(() => {
       focus.visible = false;
-    }, 1900);
+    }, 4000);
   }
 
   private updateCompletion(): void {
