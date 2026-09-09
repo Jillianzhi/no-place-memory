@@ -109,7 +109,7 @@ export const sceneDefinitions: SceneDefinition[] = [
     id: 'scene01_school',
     title: '没有结束的午休',
     place: '旧学校走廊',
-    modelPath: '/assets/models/scene01_school/scene.glb',
+    modelPath: '',
     hotspots: [
       { id: 'hotspot_radio', label: '广播', gestures: ['longPress'] },
       { id: 'hotspot_fog_glass', label: '雾玻璃', gestures: ['swipe'] },
@@ -121,7 +121,7 @@ export const sceneDefinitions: SceneDefinition[] = [
     id: 'scene02_station',
     title: '没有终点的候车室',
     place: '老县城客运站',
-    modelPath: '/assets/models/scene02_station/scene.glb',
+    modelPath: '',
     hotspots: [
       { id: 'hotspot_ticket', label: '车票', gestures: ['drag'] },
       { id: 'hotspot_board', label: '电子屏', gestures: ['tap'] },
@@ -133,7 +133,7 @@ export const sceneDefinitions: SceneDefinition[] = [
     id: 'scene03_building',
     title: '仍然亮着灯的楼道',
     place: '国企家属院楼道',
-    modelPath: '/assets/models/scene03_building/scene.glb',
+    modelPath: '',
     hotspots: [
       { id: 'hotspot_wall', label: '墙面', gestures: ['tap'] },
       { id: 'hotspot_sound_light', label: '灯', gestures: ['tap'] },
@@ -146,7 +146,7 @@ export const sceneDefinitions: SceneDefinition[] = [
     id: 'scene04_projection',
     title: '没有归处的放映厅',
     place: '旧放映厅 / 档案室 / 中式园林梦境',
-    modelPath: '/assets/models/scene04_projection/scene.glb',
+    modelPath: '',
     hotspots: [
       { id: 'hotspot_projector', label: '放映机', gestures: ['longPress'] },
       { id: 'hotspot_archive_cabinet', label: '档案袋', gestures: ['tap'] },
@@ -160,7 +160,7 @@ export const sceneDefinitions: SceneDefinition[] = [
     id: 'scene05_memory',
     title: '记忆不会排成一列',
     place: '旧照片长廊',
-    modelPath: '/assets/models/scene05_memory/scene.glb',
+    modelPath: '',
     hotspots: [
       { id: 'hotspot_memory_photo', label: '旧照片', gestures: ['tap'] },
       { id: 'exit_archive', label: '档案室门', gestures: ['tap'] }
@@ -559,9 +559,11 @@ export class SceneManager {
     this.onMessage(definition.title);
   }
 
-  nextScene(): void {
+  async nextScene(): Promise<void> {
     if (this.currentIndex < sceneDefinitions.length - 1) {
-      void this.load(this.currentIndex + 1);
+      const nextIndex = this.currentIndex + 1;
+      this.onMessage(`正在进入“${sceneDefinitions[nextIndex].title}”…`);
+      await this.load(nextIndex);
       this.onComplete('scene');
     } else {
       this.onComplete('game');
@@ -708,7 +710,7 @@ export class SceneManager {
       this.setHotspotEnabled('exit_door', false);
       this.showOpenSchoolDoor();
       this.onMessage('旧木门向走廊深处打开。');
-      window.setTimeout(() => this.nextScene(), 600);
+      window.setTimeout(() => void this.nextScene(), 600);
       return true;
     }
     return false;
@@ -744,7 +746,7 @@ export class SceneManager {
       return true;
     }
     if (id === 'exit_bus_door' && type === 'tap' && this.hasFlags('ticket', 'checked', 'board')) {
-      this.nextScene();
+      void this.nextScene();
       return true;
     }
     return false;
@@ -792,7 +794,7 @@ export class SceneManager {
       return true;
     }
     if (id === 'hotspot_iron_door' && type === 'tap' && this.hasFlags('light', 'observed', 'returned')) {
-      this.nextScene();
+      void this.nextScene();
       return true;
     }
     return false;
@@ -856,7 +858,7 @@ export class SceneManager {
       return dropId === 'hotspot_screen';
     }
     if (id === 'exit_restart' && type === 'tap' && this.hasFlags('projector', 'cabinet') && Number(flags.fragments ?? 0) >= 1) {
-      this.nextScene();
+      void this.nextScene();
       return true;
     }
     return false;
@@ -866,7 +868,7 @@ export class SceneManager {
     if (flags.projectionFinished) return;
     if (flags.projector && flags.cabinet && Number(flags.fragments ?? 0) >= 1) {
       flags.projectionFinished = true;
-      window.setTimeout(() => this.nextScene(), 700);
+      window.setTimeout(() => void this.nextScene(), 700);
     }
   }
 
@@ -924,7 +926,7 @@ export class SceneManager {
       return true;
     }
     if (id === 'exit_archive' && type === 'tap' && this.hasFlags('memoryNear', 'memoryMiddle', 'memoryFar')) {
-      this.nextScene();
+      void this.nextScene();
       return true;
     }
     return false;

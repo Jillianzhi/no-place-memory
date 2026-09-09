@@ -113,7 +113,8 @@ export class Game {
   private started = false;
 
   constructor(private readonly container: HTMLElement) {
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const isCompactTouchDevice = window.matchMedia('(pointer: coarse)').matches || window.innerWidth <= 680;
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, isCompactTouchDevice ? 1.5 : 2));
     this.renderer.shadowMap.enabled = true;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;

@@ -5,6 +5,9 @@ export class AssetLoader {
   private readonly loader = new GLTFLoader();
 
   async loadSceneModel(path: string): Promise<THREE.Group | null> {
+    // The production build currently uses procedural scenes. Avoid a slow
+    // network round-trip for model URLs that are intentionally not shipped.
+    if (!path) return null;
     try {
       const response = await fetch(path, { method: 'HEAD' });
       if (!response.ok) return null;
