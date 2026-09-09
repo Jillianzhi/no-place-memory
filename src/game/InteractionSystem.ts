@@ -221,6 +221,8 @@ export class InteractionSystem {
     const success = this.sceneManager.handleGesture(gesture);
     if (type === 'drag') this.archive.drag(success);
     if (type === 'observe' && this.sceneManager.currentDefinition.hotspots.some(h => h.id === gesture.id && h.gestures.includes('observe'))) this.archive.observe(success);
+    // On touch screens, tapping the wheel is the equivalent of desktop observation.
+    if (type === 'tap' && gesture.id === 'hotspot_bike') this.archive.observe(success);
     if (success) {
       if (type === 'swipe' && gesture.id === 'hotspot_fog_glass' && this.sceneManager.getObjectives().some(item => item.label === '擦开雾玻璃' && item.done)) {
         this.archive.hidden('fog-glass');
