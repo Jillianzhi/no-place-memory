@@ -17,6 +17,15 @@ export class ArchiveSystem {
 
   private sceneEnterAt = performance.now();
   private activeScene = '';
+  private readonly discoveries = new Set<string>();
+
+  reset(): void {
+    Object.assign(this.data, new ArchiveSystem().data);
+    this.discoveries.clear();
+    this.activeScene = '';
+    this.sceneEnterAt = performance.now();
+    localStorage.removeItem('no-place-archive');
+  }
 
   enterScene(scene: string): void {
     this.leaveScene();
@@ -30,6 +39,7 @@ export class ArchiveSystem {
     this.data.sceneTimes[this.activeScene] = (this.data.sceneTimes[this.activeScene] ?? 0) + elapsed;
     const entries = Object.entries(this.data.sceneTimes).sort((a, b) => b[1] - a[1]);
     this.data.longestScene = entries[0]?.[0] ?? null;
+    this.activeScene = '';
   }
 
   touch(id: string): void {
@@ -41,8 +51,9 @@ export class ArchiveSystem {
     this.data.errorCount += 1;
   }
 
-  hidden(): void {
-    this.data.hiddenFound += 1;
+  hidden(id: string): void {
+    this.discoveries.add(id);
+    this.data.hiddenFound = this.discoveries.size;
   }
 
   drag(success: boolean): void {
@@ -62,7 +73,8 @@ export class ArchiveSystem {
     const repeatCount = Object.values(this.data.repeatedTouches).filter((count) => count > 1).length;
     if (observeRate > 0.75 && this.data.errorCount <= 2) {
       this.data.resultType = '空间校对员';
-    } else if (this.data.hiddenFound >= 3 && dragRate >= 0.5) {
+    // Finishing the required route alone should not imply an exploration identity.
+    } else if (this.data.hiddenFound >= 6 && dragRate >= 0.5) {
       this.data.resultType = '时间褶皱拾荒者';
     } else if (repeatCount >= 3 || this.data.errorCount >= 4) {
       this.data.resultType = '错误记忆保管员';

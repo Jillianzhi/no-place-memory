@@ -9,7 +9,7 @@ import { InteractionSystem, type InteractionFeedback } from './InteractionSystem
 import { ParticleSystem } from './ParticleSystem';
 import { SceneManager } from './SceneManager';
 import { SceneEditor } from './SceneEditor';
-import { openArchiveShare } from './ArchiveShare';
+import { createArchivePoster, openArchiveShare, type ShareArchive } from './ArchiveShare';
 
 interface ArchiveProfile {
   code: string;
@@ -341,12 +341,11 @@ export class Game {
             <button class="primary-button" data-restart aria-label="重新体验">重新体验</button>
           </div>
         </footer>
-        <p class="archive-share-hint">把你的身份卡分享给身边的小伙伴 · 图片内附游戏二维码</p>
+        <p class="archive-share-hint" role="status">正在生成可长按保存的身份卡图片…</p>
       </div>
     `;
     this.container.append(panel);
-    panel.querySelector<HTMLButtonElement>('[data-share]')?.addEventListener('click', (event) => {
-      void openArchiveShare(panel, event.currentTarget as HTMLButtonElement, {
+    const shareData: ShareArchive = {
         number: archiveNumber, result, mark: profile.mark, summary: profile.summary, tags: profile.tags,
         metrics: [
           [`${data.dragSuccesses}/${data.dragAttempts}`, '拖拽归位'],
@@ -359,11 +358,32 @@ export class Game {
         })),
         totalTime: this.formatArchiveTime(totalSeconds),
         note: `你最先触碰了“${firstTouched}”，并在“${longestPlace}”停留最久。记录不会判断你是否走对，只保存你如何辨认一处不属于任何人的空间。`
-      });
+      };
+    const paper = panel.querySelector<HTMLElement>('.archive-paper')!;
+    const hint = panel.querySelector<HTMLElement>('.archive-share-hint')!;
+    const footer = panel.querySelector<HTMLElement>('.archive-footer')!;
+    let posterUrl: string | undefined;
+    void createArchivePoster(shareData).then(blob => {
+      if (!panel.isConnected) return;
+      posterUrl = URL.createObjectURL(blob);
+      const image = new Image();
+      image.className = 'archive-share-image';
+      image.alt = `${result}身份卡，长按保存图片；识别二维码进入游戏`;
+      image.src = posterUrl;
+      hint.textContent = '长按下方身份卡保存图片，分享给身边的小伙伴。识别卡片二维码即可进入游戏。';
+      paper.classList.add('archive-paper-image');
+      paper.replaceChildren(hint, image, footer);
+    }).catch(() => {
+      hint.textContent = '图片未能生成，请点击“保存分享图片”重试，打开图片后长按保存。';
+    });
+    panel.querySelector<HTMLButtonElement>('[data-share]')?.addEventListener('click', (event) => {
+      void openArchiveShare(panel, event.currentTarget as HTMLButtonElement, shareData);
     });
     panel.querySelector('[data-restart]')?.addEventListener('click', () => {
       this.audio.playSfx('dossier_close');
       panel.remove();
+      if (posterUrl) URL.revokeObjectURL(posterUrl);
+      this.archive.reset();
       this.sceneManager.restart();
       this.cameraRig.setScene(0);
       this.audio.playMusic(music.school, false);

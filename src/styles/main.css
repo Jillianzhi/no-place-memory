@@ -979,6 +979,21 @@ canvas {
   text-align: center;
 }
 
+.archive-paper.archive-paper-image {
+  padding: 16px;
+  background: #eae6d7;
+}
+.archive-paper-image .archive-share-hint {
+  margin: 0 0 14px;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #263e34;
+  background: #d6dfcf;
+  border: 1px solid #9cae98;
+}
+.archive-paper-image .archive-footer { margin-top: 16px; }
+
 .archive-share-dialog {
   width: min(560px, calc(100vw - 24px));
   max-height: calc(100dvh - 32px);

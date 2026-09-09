@@ -220,9 +220,14 @@ export class InteractionSystem {
     };
     const success = this.sceneManager.handleGesture(gesture);
     if (type === 'drag') this.archive.drag(success);
-    if (type === 'observe') this.archive.observe(success);
+    if (type === 'observe' && this.sceneManager.currentDefinition.hotspots.some(h => h.id === gesture.id && h.gestures.includes('observe'))) this.archive.observe(success);
     if (success) {
-      if (type === 'swipe' && String(gesture.id).includes('glass')) this.archive.hidden();
+      if (type === 'swipe' && gesture.id === 'hotspot_fog_glass' && this.sceneManager.getObjectives().some(item => item.label === '擦开雾玻璃' && item.done)) {
+        this.archive.hidden('fog-glass');
+      }
+      if (type === 'tap' && gesture.id === 'hotspot_memory_photo') {
+        this.archive.hidden(`photo-${object.uuid}`);
+      }
       this.playInteractionSfx(gesture, true);
       this.onFeedback({ kind: 'success', hotspotId: String(gesture.id), label: this.successLabelFor(String(gesture.id)) });
     } else if (type !== 'observe') {
