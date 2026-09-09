@@ -509,6 +509,38 @@ export class SceneManager {
     ];
   }
 
+  getNextAction(): string {
+    const flags = this.currentState.flags;
+    if (this.currentDefinition.id === 'scene01_school') {
+      if (!flags.radio) return '按住墙上的旧广播，直到圆环走完';
+      if (!flags.glass) return '在雾玻璃上来回擦拭';
+      if (!flags.clock) return '轻点或拖动停住的时钟';
+      return '点击已经亮起的木门，前往下一处空间';
+    }
+    if (this.currentDefinition.id === 'scene02_station') {
+      if (!flags.ticket) return '按住左下方车票并开始拖动';
+      if (!flags.board) return '轻点候车室上方的电子屏';
+      if (!flags.checked) return '把车票拖进右侧检票槽';
+      return '点击右后方已经打开的车门';
+    }
+    if (this.currentDefinition.id === 'scene03_building') {
+      if (!flags.light) return '轻点墙面或声控灯，让楼道亮起来';
+      if (!flags.observed) return '轻点小车轮，找出影子里的变化';
+      if (!flags.returned) return '把地上的奖状拖回右侧铁门';
+      return '点击铁门，继续前往放映厅';
+    }
+    if (this.currentDefinition.id === 'scene04_projection') {
+      if (!flags.projector) return '按住放映机，直到银幕亮起';
+      if (Number(flags.fragments ?? 0) < 1) return '把桌上的记忆碎片拖进银幕中央';
+      if (!flags.cabinet) return '轻点已经松开的档案袋';
+      return '正在前往照片长廊';
+    }
+    if (!flags.memoryNear) return '轻点近处墙面上的一张照片';
+    if (!flags.memoryMiddle) return '沿长廊寻找并轻点中段照片';
+    if (!flags.memoryFar) return '继续前往尽头，轻点远处照片';
+    return '点击长廊尽头亮起的档案室门';
+  }
+
   setHandlers(onComplete: CompletionHandler, onMessage: MessageHandler): void {
     this.onComplete = onComplete;
     this.onMessage = onMessage;

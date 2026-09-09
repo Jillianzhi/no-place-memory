@@ -142,11 +142,12 @@ export class InteractionSystem {
     if (!this.enabled) return;
     window.clearTimeout(this.longPressTimer);
     if (!this.pressedObject || this.longPressFired) {
+      const shouldClearFeedback = !this.longPressFired;
       this.pressedObject = null;
       this.sceneManager.endDrag();
       this.pointerStartedAt = 0;
       this.pointerIsDragging = false;
-      this.onFeedback({ kind: 'idle' });
+      if (shouldClearFeedback) this.onFeedback({ kind: 'idle' });
       return;
     }
 
@@ -157,26 +158,30 @@ export class InteractionSystem {
     const screenDrop = this.screenSpaceDrop(this.pressedObject, point);
     const directDrop = pressedId === 'hotspot_ticket' ? null : upHit?.object ?? null;
     const drop = screenDrop ?? directDrop ?? this.inferDrop(this.pressedObject, delta);
+    let didCommit = false;
     if (state.moved) {
       const id = this.idOf(this.pressedObject);
       const isWipe = id.includes('glass') || id.includes('rain');
       if (isWipe) {
         if (point.distanceTo(this.lastSwipePoint) >= 8 && upHit && this.idOf(upHit.object) === id) {
           this.commit('swipe', point, this.pressedObject, undefined, delta, duration, upHit.localPoint);
+          didCommit = true;
         }
       } else {
         const distance = Math.abs(delta.x) + Math.abs(delta.y);
         const gesture: GestureType = distance > 26 ? 'drag' : 'swipe';
         this.commit(gesture, point, this.pressedObject, drop ?? undefined, delta, duration, upHit?.localPoint);
+        didCommit = true;
       }
     } else {
       this.commit('tap', point, this.pressedObject, undefined, delta, duration, upHit?.localPoint);
+      didCommit = true;
     }
     this.pressedObject = null;
     this.sceneManager.endDrag();
     this.pointerStartedAt = 0;
     this.pointerIsDragging = false;
-    this.onFeedback({ kind: 'idle' });
+    if (!didCommit) this.onFeedback({ kind: 'idle' });
   };
 
   update(time: number): void {

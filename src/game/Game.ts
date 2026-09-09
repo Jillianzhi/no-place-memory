@@ -111,6 +111,8 @@ export class Game {
   private lastFrame = performance.now();
   private fps = 60;
   private started = false;
+  private toastTimer = 0;
+  private hintTimer = 0;
 
   constructor(private readonly container: HTMLElement) {
     const isCompactTouchDevice = window.matchMedia('(pointer: coarse)').matches || window.innerWidth <= 680;
@@ -402,9 +404,10 @@ export class Game {
 
   private readonly showMessage = (message: string): void => {
     if (!this.started && !message.includes('没有结束')) return;
+    window.clearTimeout(this.toastTimer);
     this.toast.textContent = message;
     this.toast.classList.add('visible');
-    window.setTimeout(() => this.toast.classList.remove('visible'), 2300);
+    this.toastTimer = window.setTimeout(() => this.toast.classList.remove('visible'), 4800);
     this.updateHud();
   };
 
@@ -414,7 +417,7 @@ export class Game {
     const items = this.sceneManager.getObjectives();
     const done = items.filter((item) => item.done).length;
     this.progress.textContent = `${done}/${items.length}`;
-    this.objectives.innerHTML = items
+    this.objectives.innerHTML = `<strong class="objective-current"><small>现在要做</small>${this.sceneManager.getNextAction()}</strong>` + items
       .map((item) => `<span class="${item.done ? 'done' : ''}">${item.done ? '✓' : '·'} ${item.label}</span>`)
       .join('');
   }
@@ -439,6 +442,7 @@ export class Game {
     }
 
     if (feedback.label) {
+      window.clearTimeout(this.hintTimer);
       this.hint.textContent = feedback.label;
       this.hint.classList.toggle('success', feedback.kind === 'success');
       this.hint.classList.toggle('error', feedback.kind === 'error');
@@ -448,7 +452,7 @@ export class Game {
         this.hint.style.top = `${Math.min(window.innerHeight - 76, Math.max(76, feedback.point.y - 44))}px`;
       }
       if (feedback.kind === 'success' || feedback.kind === 'error') {
-        window.setTimeout(() => this.hint.classList.remove('visible', 'success', 'error'), 900);
+        this.hintTimer = window.setTimeout(() => this.hint.classList.remove('visible', 'success', 'error'), 2400);
       }
     }
     this.updateHud();

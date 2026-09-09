@@ -388,6 +388,24 @@ canvas {
   text-overflow: ellipsis;
 }
 
+.objective-current {
+  display: grid;
+  gap: 3px;
+  margin-bottom: 3px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(226, 217, 255, 0.2);
+  color: rgba(255, 250, 255, 0.96);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.objective-current small {
+  color: rgba(247, 216, 255, 0.68);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+}
+
 .objective-panel .done {
   color: #f7d8ff;
   text-shadow: 0 0 14px rgba(247, 216, 255, 0.62);
@@ -1080,6 +1098,11 @@ canvas {
 
   .objective-panel {
     width: min(230px, calc(100vw - 36px));
+    font-size: 12px;
+  }
+
+  .objective-current {
+    grid-column: 1 / -1;
     font-size: 12px;
   }
 }
