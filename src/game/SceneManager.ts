@@ -6,6 +6,7 @@ import { DreamMaterials } from './DreamMaterials';
 import { ProceduralGeometryFactory } from './ProceduralGeometryFactory';
 import { SceneLayoutStore, type SavedTransform } from './SceneLayoutStore';
 import type { GestureType, HotspotDefinition, HotspotId, PointerGesture, SceneBuildResult, SceneDefinition, SceneState } from './types';
+import { applyVisualOpacity } from './VisualOpacity';
 
 type CompletionHandler = (kind: 'scene' | 'game') => void;
 type MessageHandler = (message: string) => void;
@@ -1398,10 +1399,7 @@ export class SceneManager {
       const material = mesh.material;
       if (!material) return;
       const materials = Array.isArray(material) ? material : [material];
-      for (const item of materials) {
-        item.transparent = opacity < 1 || item.transparent;
-        item.opacity = opacity;
-      }
+      for (const item of materials) applyVisualOpacity(item, opacity);
     });
   }
 
