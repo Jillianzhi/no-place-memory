@@ -6,3 +6,4 @@ outputs/
 docs/qa/
 source-assets/
 .wrangler/
+.gstack/
