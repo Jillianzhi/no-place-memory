@@ -9,7 +9,7 @@ import { InteractionSystem, type InteractionFeedback } from './InteractionSystem
 import { ParticleSystem } from './ParticleSystem';
 import { SceneManager } from './SceneManager';
 import { SceneEditor } from './SceneEditor';
-import { createArchivePoster, openArchiveShare, type ShareArchive } from './ArchiveShare';
+import type { ShareArchive } from './ArchiveShare';
 
 interface ArchiveProfile {
   code: string;
@@ -371,7 +371,7 @@ export class Game {
     const hint = panel.querySelector<HTMLElement>('.archive-share-hint')!;
     const footer = panel.querySelector<HTMLElement>('.archive-footer')!;
     let posterUrl: string | undefined;
-    void createArchivePoster(shareData).then(blob => {
+    void import('./ArchiveShare').then(({ createArchivePoster }) => createArchivePoster(shareData)).then(blob => {
       if (!panel.isConnected) return;
       posterUrl = URL.createObjectURL(blob);
       const image = new Image();
@@ -385,7 +385,10 @@ export class Game {
       hint.textContent = '图片未能生成，请点击“保存图片”重试，打开图片后长按保存。';
     });
     panel.querySelector<HTMLButtonElement>('[data-share]')?.addEventListener('click', (event) => {
-      void openArchiveShare(panel, event.currentTarget as HTMLButtonElement, shareData);
+      const button = event.currentTarget as HTMLButtonElement;
+      void import('./ArchiveShare').then(({ openArchiveShare }) => openArchiveShare(panel, button, shareData)).catch(() => {
+        hint.textContent = '图片未能加载，请点击“保存图片”重试。';
+      });
     });
     panel.querySelector('[data-restart]')?.addEventListener('click', () => {
       this.audio.playSfx('dossier_close');

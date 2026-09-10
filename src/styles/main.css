@@ -104,7 +104,7 @@ canvas {
   background: rgba(18, 22, 25, 0.92);
   color: #f2f3ef;
   box-shadow: 0 16px 46px rgba(0, 0, 0, 0.34);
-  backdrop-filter: blur(18px);
+  backdrop-filter: none;
   font-family: ui-sans-serif, system-ui, -apple-system, "PingFang SC", sans-serif;
   letter-spacing: 0;
 }
@@ -360,8 +360,7 @@ canvas {
   min-width: 52px;
   padding: 8px 12px;
   border: 1px solid rgba(231, 220, 255, 0.34);
-  background: rgba(12, 14, 28, 0.42);
-  backdrop-filter: blur(14px);
+  background: rgba(12, 14, 28, 0.82);
   text-align: center;
 }
 
@@ -374,8 +373,7 @@ canvas {
   width: min(280px, calc(100vw - 36px));
   padding: 12px 14px;
   border: 1px solid rgba(226, 217, 255, 0.24);
-  background: rgba(12, 14, 28, 0.34);
-  backdrop-filter: blur(14px);
+  background: rgba(12, 14, 28, 0.82);
   color: rgba(255, 250, 255, 0.74);
   font-size: 13px;
   line-height: 1.35;
@@ -422,7 +420,7 @@ canvas {
   border: 1px solid rgba(247, 216, 255, 0.34);
   background: rgba(11, 14, 29, 0.66);
   color: rgba(255, 250, 255, 0.92);
-  backdrop-filter: blur(12px);
+  backdrop-filter: none;
   opacity: 0;
   transition: opacity 140ms ease, transform 140ms ease;
   text-align: center;
@@ -480,9 +478,9 @@ canvas {
   max-width: min(680px, calc(100vw - 36px));
   padding: 12px 18px;
   border: 1px solid rgba(234, 220, 255, 0.3);
-  background: rgba(15, 17, 33, 0.58);
+  background: rgba(15, 17, 33, 0.88);
   color: rgba(255, 250, 255, 0.92);
-  backdrop-filter: blur(18px);
+  backdrop-filter: none;
   opacity: 0;
   transition: 220ms ease;
   text-align: center;
@@ -502,7 +500,7 @@ canvas {
   display: grid;
   place-items: center;
   padding: 24px;
-  backdrop-filter: blur(8px);
+  backdrop-filter: none;
 }
 
 .start-card {
@@ -510,9 +508,9 @@ canvas {
   overflow: hidden;
   padding: 0;
   background: rgba(7, 10, 14, 0.28);
-  backdrop-filter: blur(2px) saturate(0.62);
+  backdrop-filter: none;
   isolation: isolate;
-  transition: background-color 900ms ease, backdrop-filter 900ms ease;
+  transition: background-color 900ms ease;
 }
 
 .start-card::before,
@@ -560,12 +558,11 @@ canvas {
 .start-atmosphere::after {
   content: "";
   position: absolute;
-  inset: -40%;
+  inset: 0;
   opacity: 0.18;
   background-image: url('/assets/generated/scene03_v4/s03_mat_upper_plaster_v1.png');
   background-size: 420px 420px;
-  mix-blend-mode: soft-light;
-  animation: start-grain 9s steps(8) infinite;
+  mix-blend-mode: normal;
 }
 
 .start-aperture {
@@ -607,7 +604,7 @@ canvas {
   place-items: start center;
   overflow-y: auto;
   background: rgba(9, 11, 16, 0.88);
-  backdrop-filter: blur(12px) saturate(0.62);
+  backdrop-filter: none;
 }
 
 .start-content,
@@ -694,8 +691,8 @@ canvas {
 }
 
 @keyframes start-title-in {
-  from { opacity: 0; transform: translateY(24px); filter: blur(7px); }
-  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes start-copy-in {

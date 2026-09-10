@@ -1,8 +1,6 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 export class AssetLoader {
-  private readonly loader = new GLTFLoader();
 
   async loadSceneModel(path: string): Promise<THREE.Group | null> {
     // The production build currently uses procedural scenes. Avoid a slow
@@ -11,7 +9,8 @@ export class AssetLoader {
     try {
       const response = await fetch(path, { method: 'HEAD' });
       if (!response.ok) return null;
-      const gltf = await this.loader.loadAsync(path);
+      const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
+      const gltf = await new GLTFLoader().loadAsync(path);
       const root = gltf.scene;
       root.traverse((object) => {
         object.userData.source = 'gltf';
