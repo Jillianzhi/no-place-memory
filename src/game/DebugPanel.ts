@@ -9,10 +9,11 @@ interface DebugSnapshot {
   usedModel: boolean;
   usedFallback: boolean;
   archiveData: ArchiveData;
+  gpu: { geometries: number; textures: number; calls: number; triangles: number };
 }
 
 export class DebugPanel {
-  private readonly enabled = new URLSearchParams(location.search).get('debug') === '1';
+  readonly enabled = new URLSearchParams(location.search).get('debug') === '1';
   private readonly element: HTMLPreElement;
 
   constructor() {
@@ -28,6 +29,7 @@ export class DebugPanel {
         currentScene: snapshot.scene.id,
         title: snapshot.scene.title,
         fps: Math.round(snapshot.fps),
+        gpu: snapshot.gpu,
         flags: snapshot.flags,
         interactables: snapshot.interactables,
         currentHit: snapshot.hit,

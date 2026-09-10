@@ -113,10 +113,12 @@ export class Game {
   private started = false;
   private toastTimer = 0;
   private hintTimer = 0;
+  private lastHudContent = '';
+  private lastDebugUpdate = 0;
 
   constructor(private readonly container: HTMLElement) {
     const isCompactTouchDevice = window.matchMedia('(pointer: coarse)').matches || window.innerWidth <= 680;
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, isCompactTouchDevice ? 1.5 : 2));
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, isCompactTouchDevice ? 1 : 2));
     this.renderer.shadowMap.enabled = true;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -416,11 +418,15 @@ export class Game {
 
   private updateHud(): void {
     const definition = this.sceneManager.currentDefinition;
-    this.sceneTitle.innerHTML = `<strong>${definition.title}</strong>`;
     const items = this.sceneManager.getObjectives();
     const done = items.filter((item) => item.done).length;
+    const nextAction = this.sceneManager.getNextAction();
+    const content = JSON.stringify([definition.id, items, nextAction]);
+    if (content === this.lastHudContent) return;
+    this.lastHudContent = content;
+    this.sceneTitle.innerHTML = `<strong>${definition.title}</strong>`;
     this.progress.textContent = `${done}/${items.length}`;
-    this.objectives.innerHTML = `<strong class="objective-current"><small>现在要做</small>${this.sceneManager.getNextAction()}</strong>` + items
+    this.objectives.innerHTML = `<strong class="objective-current"><small>现在要做</small>${nextAction}</strong>` + items
       .map((item) => `<span class="${item.done ? 'done' : ''}">${item.done ? '✓' : '·'} ${item.label}</span>`)
       .join('');
   }
@@ -462,6 +468,11 @@ export class Game {
   };
 
   private readonly animate = (): void => {
+    requestAnimationFrame(this.animate);
+    if (document.hidden) {
+      this.lastFrame = performance.now();
+      return;
+    }
     const now = performance.now();
     const delta = now - this.lastFrame;
     this.lastFrame = now;
@@ -480,7 +491,9 @@ export class Game {
     this.interaction.update(now);
     this.editor?.update();
     this.renderer.render(this.sceneManager.scene, this.cameraRig.camera);
-    this.debug.update({
+    if (this.debug.enabled && now - this.lastDebugUpdate >= 500) {
+      this.lastDebugUpdate = now;
+      this.debug.update({
       scene: this.sceneManager.currentDefinition,
       fps: this.fps,
       flags: this.sceneManager.currentState.flags,
@@ -488,9 +501,10 @@ export class Game {
       hit: this.hit,
       usedModel: this.sceneManager.usingModel,
       usedFallback: this.sceneManager.usingFallback,
-      archiveData: this.archive.data
+      archiveData: this.archive.data,
+      gpu: { ...this.renderer.info.memory, calls: this.renderer.info.render.calls, triangles: this.renderer.info.render.triangles }
     });
-    requestAnimationFrame(this.animate);
+    }
   };
 
   private readonly resize = (): void => {

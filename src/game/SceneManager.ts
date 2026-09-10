@@ -7,6 +7,7 @@ import { ProceduralGeometryFactory } from './ProceduralGeometryFactory';
 import { SceneLayoutStore, type SavedTransform } from './SceneLayoutStore';
 import type { GestureType, HotspotDefinition, HotspotId, PointerGesture, SceneBuildResult, SceneDefinition, SceneState } from './types';
 import { applyVisualOpacity } from './VisualOpacity';
+import { disposeSceneResources } from './SceneResources';
 
 type CompletionHandler = (kind: 'scene' | 'game') => void;
 type MessageHandler = (message: string) => void;
@@ -567,7 +568,10 @@ export class SceneManager {
 
   async load(index = this.currentIndex): Promise<void> {
     this.currentIndex = index;
-    if (this.root) this.scene.remove(this.root);
+    if (this.root) {
+      this.scene.remove(this.root);
+      disposeSceneResources(this.root, [...Object.values(this.materials), ...Object.values(this.kit)]);
+    }
     this.interactables = [];
     this.root = new THREE.Group();
     this.root.name = 'active_scene_root';
